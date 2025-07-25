@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: recipe_content-service
+server:
+  port: 40000

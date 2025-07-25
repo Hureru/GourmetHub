@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: product_artisan-service
+
+server:
+  port: 30000

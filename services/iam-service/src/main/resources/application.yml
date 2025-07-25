@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: iam-service
+  datasource:
+    url: jdbc:mysql://localhost:3307/db_iam?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+server:
+  port: 10000
+
+mybatis-plus:
+  mapper-locations: classpath:/mapper/**/*.xml # (可选)
+  global-config:
+    db-config:
+      id-type: auto # (可选) 主键自增
+  configuration:  # 开启日志
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl # (可选)
