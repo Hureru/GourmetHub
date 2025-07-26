@@ -1,6 +1,11 @@
 spring:
   application:
     name: product_artisan-service
+  data:
+    mongodb:
+#      uri: mongodb://localhost:27017/product_artisan_db
+      # 如果需要用户名密码，使用以下格式：
+       uri: mongodb://root:123456@localhost:27017/db_product_artisan
 
 server:
   port: 30000
