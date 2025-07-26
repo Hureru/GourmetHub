@@ -2,14 +2,12 @@ package com.hureru.iam.controller;
 
 
 import com.hureru.common.R;
-import com.hureru.iam.bean.UserProfiles;
-import com.hureru.iam.service.impl.UserProfilesServiceImpl;
+import com.hureru.iam.service.IUserProfilesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
@@ -27,7 +25,7 @@ import java.util.Map;
 public class UserProfilesController {
 
     @Autowired
-    private UserProfilesServiceImpl userProfilesService;
+    private IUserProfilesService userProfilesService;
     /**
      * 受保护接口, 获取当前认证用户的完整个人资料
      * @param accessToken 有效的Bearer令牌
