@@ -3,6 +3,7 @@ package com.hureru.iam.controller;
 
 import com.hureru.common.R;
 import com.hureru.iam.service.IUserProfilesService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,11 +22,10 @@ import java.util.Map;
  * @since 2025-07-26
  */
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/v1")
 public class UserProfilesController {
-
-    @Autowired
-    private IUserProfilesService userProfilesService;
+    private final IUserProfilesService userProfilesService;
     /**
      * 受保护接口, 获取当前认证用户的完整个人资料
      * @param accessToken 有效的Bearer令牌
