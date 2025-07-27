@@ -61,4 +61,33 @@ public class AddressesServiceImpl extends ServiceImpl<AddressesMapper, Addresses
         save(address);
         return address;
     }
+
+    // 预缓存字段描述符（避免每次反射）
+    private static final List<PropertyDescriptor> DTO_FIELDS =
+            Arrays.stream(BeanUtils.getPropertyDescriptors(AddressDTO.class))
+                    .filter(pd -> !"class".equals(pd.getName()))
+                    .toList();
+    @Override
+    @Transactional
+    public void updateAddress(Long addrId, Long userId, AddressDTO addresses){
+        // 验证地址所属用户
+        checkUserAddr(addrId, userId);
+        UpdateWrapper<Addresses> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("id", addrId);
+
+        // 使用缓存字段描述符
+        DTO_FIELDS.forEach(pd -> {
+            try {
+                Object value = pd.getReadMethod().invoke(addresses);
+                if (value != null) {
+                    updateWrapper.set(camelToUnderline(pd.getName()), value);
+                }
+            } catch (Exception ignored) {}
+        });
+
+        if(!update(updateWrapper)){
+            // "配送地址更新失败"
+            throw new BusinessException(500, "配送地址更新失败");
+        }
+    }
 }

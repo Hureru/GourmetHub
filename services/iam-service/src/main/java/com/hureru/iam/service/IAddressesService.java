@@ -19,4 +19,6 @@ public interface IAddressesService extends IService<Addresses> {
 
     Addresses insertAddress(Long userId, AddressDTO addresses);
 
+    void updateAddress(Long addrId, Long userId, AddressDTO addresses);
+
 }
