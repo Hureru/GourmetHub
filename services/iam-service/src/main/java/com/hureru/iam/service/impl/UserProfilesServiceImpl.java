@@ -34,11 +34,7 @@ public class UserProfilesServiceImpl extends ServiceImpl<UserProfilesMapper, Use
                     .toList();
 
     @Override
-    public UserProfiles updateUserByFields(Long id, UserProfileDTO dto) {
-        if (dto == null) {
-            throw new IllegalArgumentException("更新数据不能为空");
-        }
-
+    public void updateUserByFields(Long id, UserProfileDTO dto) {
         UpdateWrapper<UserProfiles> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("user_id", id);
 
@@ -52,9 +48,8 @@ public class UserProfilesServiceImpl extends ServiceImpl<UserProfilesMapper, Use
             } catch (Exception ignored) {}
         });
 
-        if (update(null, updateWrapper)) {
-            return getById(id);
-        } else {
+        if(!update(null, updateWrapper)){
+            // "用户不存在"
             throw new BusinessException(404, "用户不存在");
         }
     }

@@ -41,7 +41,7 @@ public class UserProfilesController {
     /**
      * 受保护接口, 更新当前认证用户的个人资料
      * @param userProfile 需要更新的资料
-     * @return {@code 200 OK} 返回更新后的个人资料
+     * @return {@code 200 OK} 返回 success
      * {@code 401 Unauthorized} 令牌无效或缺失
      */
     @PutMapping("/users/me")
@@ -49,8 +49,8 @@ public class UserProfilesController {
         // TODO 从JWT中获取用户ID
         Long userId = 1L;
         // 更新个人资料
-        UserProfiles profile = userProfilesService.updateUserByFields(userId, userProfile);
-        return R.ok("更新成功",  profile);
+        userProfilesService.updateUserByFields(userId, userProfile);
+        return R.ok(200);
     }
 
 }

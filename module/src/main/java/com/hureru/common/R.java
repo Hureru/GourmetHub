@@ -17,6 +17,13 @@ public class R {
         return r;
     }
 
+    public static R ok (int code){
+        R r = new R();
+        r.setCode(code);
+        r.setMsg("success");
+        return r;
+    }
+
     public static R ok(String msg, Object data){
         R r = new R();
         r.setCode(200);

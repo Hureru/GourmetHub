@@ -15,5 +15,5 @@ import java.util.Map;
  * @since 2025-07-26
  */
 public interface IUserProfilesService extends IService<UserProfiles> {
-    UserProfiles updateUserByFields(Long id, UserProfileDTO dto);
+    void updateUserByFields(Long id, UserProfileDTO dto);
 }
