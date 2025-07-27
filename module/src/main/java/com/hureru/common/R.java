@@ -17,10 +17,8 @@ public class R {
         return r;
     }
 
-    public static R ok (String msg, Object data){
-        R r = new R();
-        r.setCode(200);
-        r.setMsg(msg);
+    public static R ok (int code, String msg, Object data){
+        R r = error(code, msg);
         r.setData(data);
         return r;
     }
@@ -38,5 +36,4 @@ public class R {
         r.setMsg(msg);
         return r;
     }
-
 }

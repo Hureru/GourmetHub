@@ -35,4 +35,8 @@ public class UserRoleMapping implements Serializable {
     private Integer roleId;
 
 
+    public UserRoleMapping(Long userId, int id) {
+        this.setUserId(userId);
+        this.setRoleId(id);
+    }
 }

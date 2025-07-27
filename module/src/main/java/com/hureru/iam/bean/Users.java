@@ -39,7 +39,7 @@ public class Users implements Serializable {
     private String passwordHash;
 
     @ApiModelProperty(value = "用户账户状态")
-    private String status;
+    private Status status;
 
     @ApiModelProperty(value = "记录创建时间")
     private LocalDateTime createdAt;
@@ -47,5 +47,15 @@ public class Users implements Serializable {
     @ApiModelProperty(value = "记录最后更新时间")
     private LocalDateTime updatedAt;
 
+    public enum Status {
+        ACTIVE,
+        PENDING_VERIFICATION,
+        SUSPENDED
+    }
 
+    public Users(String email, String password) {
+        this.email = email;
+        this.passwordHash = password;
+        this.status = Status.ACTIVE;
+    }
 }

@@ -48,4 +48,10 @@ public class UserProfiles implements Serializable {
     private LocalDateTime updatedAt;
 
 
+    public UserProfiles(Long id, String nickname) {
+        this.setUserId(id);
+        this.setNickname(nickname);
+        this.setAvatarUrl("default.jpg");
+        this.setBio("用户很懒，还没有设置简介哦~");
+    }
 }
