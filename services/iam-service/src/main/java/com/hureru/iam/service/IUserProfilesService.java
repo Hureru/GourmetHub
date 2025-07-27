@@ -2,6 +2,7 @@ package com.hureru.iam.service;
 
 import com.hureru.iam.bean.UserProfiles;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.hureru.iam.dto.UserProfileDTO;
 
 import java.util.Map;
 
@@ -14,5 +15,5 @@ import java.util.Map;
  * @since 2025-07-26
  */
 public interface IUserProfilesService extends IService<UserProfiles> {
-    UserProfiles updateUserByFields(Long id, Map<String, Object> fields);
+    UserProfiles updateUserByFields(Long id, UserProfileDTO dto);
 }

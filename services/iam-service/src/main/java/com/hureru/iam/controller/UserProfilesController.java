@@ -3,12 +3,11 @@ package com.hureru.iam.controller;
 
 import com.hureru.common.R;
 import com.hureru.iam.bean.UserProfiles;
+import com.hureru.iam.dto.UserProfileDTO;
 import com.hureru.iam.service.IUserProfilesService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -41,17 +40,17 @@ public class UserProfilesController {
 
     /**
      * 受保护接口, 更新当前认证用户的个人资料
-     * @param fields 需要更新的字段列表
-     *               <code>nickname/avatarUrl/bio</code>
+     * @param userProfile 需要更新的资料
      * @return {@code 200 OK} 返回更新后的个人资料
      * {@code 401 Unauthorized} 令牌无效或缺失
      */
     @PutMapping("/users/me")
-    public R updateMe(/*@AuthenticationPrincipal Jwt jwt,*/ Map<String, Object> fields) {
-        // TODO 实现更新个人资料逻辑
-//        Long id = JwtUtils.getUserId(accessToken);
-//        return userProfilesService.updateUserByFields(id, fields);
-        return null;
+    public R updateMe(/*@AuthenticationPrincipal Jwt jwt,*/ @Valid @RequestBody UserProfileDTO userProfile) {
+        // TODO 从JWT中获取用户ID
+        Long userId = 1L;
+        // 更新个人资料
+        UserProfiles profile = userProfilesService.updateUserByFields(userId, userProfile);
+        return R.ok("更新成功",  profile);
     }
 
 }

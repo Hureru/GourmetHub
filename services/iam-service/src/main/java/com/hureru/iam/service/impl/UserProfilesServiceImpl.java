@@ -1,15 +1,18 @@
 package com.hureru.iam.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.hureru.common.exception.BusinessException;
 import com.hureru.iam.bean.UserProfiles;
+import com.hureru.iam.dto.UserProfileDTO;
 import com.hureru.iam.mapper.UserProfilesMapper;
 import com.hureru.iam.service.IUserProfilesService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
+import java.beans.PropertyDescriptor;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import static com.baomidou.mybatisplus.core.toolkit.StringUtils.camelToUnderline;
 
@@ -23,26 +26,36 @@ import static com.baomidou.mybatisplus.core.toolkit.StringUtils.camelToUnderline
  */
 @Service
 public class UserProfilesServiceImpl extends ServiceImpl<UserProfilesMapper, UserProfiles> implements IUserProfilesService {
+
+    // 预缓存字段描述符（避免每次反射）
+    private static final List<PropertyDescriptor> DTO_FIELDS =
+            Arrays.stream(BeanUtils.getPropertyDescriptors(UserProfileDTO.class))
+                    .filter(pd -> !"class".equals(pd.getName()))
+                    .toList();
+
     @Override
-    public UserProfiles updateUserByFields(Long id, Map<String, Object> fields) {
-        if (fields == null || fields.isEmpty()) {
-            throw new IllegalArgumentException("更新字段不能为空");
+    public UserProfiles updateUserByFields(Long id, UserProfileDTO dto) {
+        if (dto == null) {
+            throw new IllegalArgumentException("更新数据不能为空");
         }
 
         UpdateWrapper<UserProfiles> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("user_id", id);
 
-        // 只设置合法字段（白名单方式防止SQL注入）
-        List<String> allowedFields = Arrays.asList("nickname", "avatarUrl", "bio");
-
-        fields.forEach((key, value) -> {
-            if (allowedFields.contains(key)) {
-                String column = camelToUnderline(key); // 驼峰命名转换
-                updateWrapper.set(column, value);
-            }
+        // 使用缓存字段描述符
+        DTO_FIELDS.forEach(pd -> {
+            try {
+                Object value = pd.getReadMethod().invoke(dto);
+                if (value != null) {
+                    updateWrapper.set(camelToUnderline(pd.getName()), value);
+                }
+            } catch (Exception ignored) {}
         });
 
-        update(null, updateWrapper);
-        return getById(id);
+        if (update(null, updateWrapper)) {
+            return getById(id);
+        } else {
+            throw new BusinessException(404, "用户不存在");
+        }
     }
 }
