@@ -2,11 +2,13 @@ package com.hureru.iam.controller;
 
 
 import com.hureru.common.R;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import com.hureru.iam.bean.Users;
+import com.hureru.iam.dto.UserDTO;
+import com.hureru.iam.service.IUsersService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * <p>
@@ -16,15 +18,16 @@ import org.springframework.web.bind.annotation.RestController;
  * @author zheng
  * @since 2025-07-26
  */
+@Slf4j
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/v1")
 public class UsersController {
+    private final IUsersService usersService;
 
     /**
      * 公开接口，用于创建新用户账户
-     * @param email 用户邮箱
-     * @param password 用户密码
-     * @param nickname 用户昵称
+     * @param userDTO 用户注册信息
      * @return {@code 201 Created} 成功响应示例：
      * <pre>
      * {
@@ -38,10 +41,12 @@ public class UsersController {
      * {@code 409 Conflict} 邮箱已存在
      */
     @PostMapping("/users/register")
-    public R register(@RequestParam String email,
-                      @RequestParam String password,
-                      @RequestParam String nickname) {
-        // TODO 用户注册
-        return R.ok("register", null);
+    public R register(@Valid @RequestBody UserDTO userDTO) {
+        // 用户注册
+        Users user = usersService.userRegister(userDTO.getEmail(), userDTO.getPassword(), userDTO.getNickname());
+        userDTO.setUserId(user.getId());
+        log.info("用户注册：{}", userDTO);
+        return R.ok(201, "用户注册成功", userDTO);
     }
+
 }
