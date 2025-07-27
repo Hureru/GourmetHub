@@ -1,4 +1,4 @@
-package com.hureru.iam.exception;
+package com.hureru.common.exception;
 
 import lombok.Getter;
 

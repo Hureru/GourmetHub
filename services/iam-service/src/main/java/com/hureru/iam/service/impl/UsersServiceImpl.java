@@ -3,7 +3,7 @@ package com.hureru.iam.service.impl;
 import com.hureru.iam.bean.UserProfiles;
 import com.hureru.iam.bean.UserRoleMapping;
 import com.hureru.iam.bean.Users;
-import com.hureru.iam.exception.BusinessException;
+import com.hureru.common.exception.BusinessException;
 import com.hureru.iam.mapper.UserProfilesMapper;
 import com.hureru.iam.mapper.UserRoleMappingMapper;
 import com.hureru.iam.mapper.UsersMapper;
