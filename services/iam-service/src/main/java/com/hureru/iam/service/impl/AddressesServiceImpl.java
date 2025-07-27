@@ -111,4 +111,29 @@ public class AddressesServiceImpl extends ServiceImpl<AddressesMapper, Addresses
         }
     }
 
+    @Override
+    @Transactional
+    public void deleteAddress(Long addrId, Long userId) {
+        // 验证地址所属用户
+        checkUserAddr(addrId, userId);
+
+        if (!removeById(addrId)){
+            // "删除配送地址失败"
+            throw new BusinessException(500, "删除配送地址失败");
+        }
+    }
+
+
+    private void checkUserAddr(Long addrId, Long userId) {
+        Addresses existingAddress = getById(addrId);
+        if (existingAddress == null) {
+            // "配送地址不存在"
+            throw new BusinessException(404, "配送地址不存在");
+        }
+        if (!existingAddress.getUserId().equals(userId)) {
+            // "无权操作该配送地址"
+            throw new BusinessException(403, "无权操作该配送地址");
+        }
+    }
+
 }
