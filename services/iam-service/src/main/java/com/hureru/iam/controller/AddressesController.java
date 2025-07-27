@@ -41,13 +41,58 @@ public class AddressesController {
     }
 
     /**
-     * 受保护接口, 为当前用户添加新配送地址
+     * 受保护接口, 为当前用户添加新配送地址, 具有上限：10
      * @param address 配送地址
-     * @return {@code 201 Created} 成功放回新增的配送地址
+     * @return {@code 201 Created} 成功返回新增的配送地址
      */
     @PostMapping("/users/me/addresses")
-    public R createAddress(/*@AuthenticationPrincipal Jwt jwt,*/ @RequestBody Addresses address){
-        // TODO 实现创建配送地址逻辑
-        return R.ok();
+    public R createAddress(/*@AuthenticationPrincipal Jwt jwt,*/ @Validated(Create.class) @RequestBody AddressDTO address){
+        //TODO 从JWT中获取用户ID
+        Long userId = 1L;
+        // 创建配送地址
+        Addresses insertAddress = addressesService.insertAddress(userId, address);
+        return R.ok(201, "创建地址成功", insertAddress);
     }
+
+    /**
+     * 受保护接口, 更新配送地址
+     * @param address 配送地址更新信息
+     * @return {@code 200 OK} 成功返回 success
+     */
+    @PutMapping("/users/me/addresses/{id}")
+    public R updateAddress(/*@AuthenticationPrincipal Jwt jwt,*/ @PathVariable("id") Long addrId, @Validated(Update.class) @RequestBody AddressDTO address){
+        //TODO 从JWT中获取用户ID
+        Long userId = 1L;
+        // 更新配送地址
+        addressesService.updateAddress(addrId, userId, address);
+        return R.ok(200);
+    }
+
+    /**
+     * 设置默认地址
+     * @param addrId 配送地址ID
+     * @return {@code 200 OK}
+     */
+    @PutMapping("/users/me/addresses/{id}/default")
+    public R updateDefaultAddr(/*@AuthenticationPrincipal Jwt jwt,*/ @PathVariable("id")Long addrId){
+        //TODO 从JWT中获取用户ID
+        Long userId = 1L;
+        addressesService.updateDefaultAddr(addrId, userId);
+        return R.ok(200);
+    }
+
+    /**
+     * 删除配送地址
+     * @return {@code 200 OK}
+     */
+    @DeleteMapping("/users/me/addresses/{id}")
+    public R deleteAddress(/*@AuthenticationPrincipal Jwt jwt,*/ @PathVariable("id") Long addrId) {
+        //TODO 从JWT中获取用户ID
+        Long userId = 1L;
+        // 删除配送地址
+        addressesService.deleteAddress(addrId, userId);
+        return R.ok(200);
+    }
+
+
 }

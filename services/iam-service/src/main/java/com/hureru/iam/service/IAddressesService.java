@@ -17,4 +17,6 @@ import java.util.List;
 public interface IAddressesService extends IService<Addresses> {
     List<Addresses> getAllAddressesByUserId(Long userId);
 
+    Addresses insertAddress(Long userId, AddressDTO addresses);
+
 }
