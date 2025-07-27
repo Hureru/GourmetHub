@@ -17,7 +17,7 @@ public class AddressDTO {
     private String recipientName;
 
     @NotBlank(groups = {Create.class})
-    @Pattern(regexp = "^[0-9\\-+()]{6,20}$", groups = {Create.class, Update.class})
+    @Pattern(regexp = "^1[3-9]\\d{9}$", groups = {Create.class, Update.class})
     private String phoneNumber;
 
     @NotBlank(groups = {Create.class})
@@ -32,7 +32,5 @@ public class AddressDTO {
     @Size(max = 50, groups = {Create.class, Update.class})
     private String stateProvince;
 
-    @NotNull(groups = {Create.class})
-    private Boolean isDefault;
 }
 
