@@ -90,4 +90,25 @@ public class AddressesServiceImpl extends ServiceImpl<AddressesMapper, Addresses
             throw new BusinessException(500, "配送地址更新失败");
         }
     }
+
+    @Override
+    @Transactional
+    public void updateDefaultAddr(Long addrId, Long userId) {
+        // 验证地址所属用户
+        checkUserAddr(addrId, userId);
+        UpdateWrapper<Addresses> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("user_id", userId);
+        updateWrapper.set("is_default", false);
+        if(!update(null, updateWrapper)){
+            throw new BusinessException(500, "更新失败");
+        }
+
+        updateWrapper.clear();
+        updateWrapper.eq("id", addrId);
+        updateWrapper.set("is_default", true);
+        if (!update(null, updateWrapper)){
+            throw new BusinessException(500, "更新失败");
+        }
+    }
+
 }
