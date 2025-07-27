@@ -10,7 +10,7 @@ server:
   port: 20000
 
 mybatis-plus:
-  mapper-locations: classpath:/mapper/**/*.xml # (可选)
+#  mapper-locations: classpath:/mapper/**/*.xml # (可选)
   global-config:
     db-config:
       id-type: auto # (可选) 主键自增
