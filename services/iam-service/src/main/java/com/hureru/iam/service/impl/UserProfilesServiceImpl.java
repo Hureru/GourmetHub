@@ -5,8 +5,6 @@ import com.hureru.iam.bean.UserProfiles;
 import com.hureru.iam.mapper.UserProfilesMapper;
 import com.hureru.iam.service.IUserProfilesService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -24,9 +22,7 @@ import static com.baomidou.mybatisplus.core.toolkit.StringUtils.camelToUnderline
  * @since 2025-07-26
  */
 @Service
-@RequiredArgsConstructor
 public class UserProfilesServiceImpl extends ServiceImpl<UserProfilesMapper, UserProfiles> implements IUserProfilesService {
-    private final UserProfilesMapper userProfilesMapper;
     @Override
     public UserProfiles updateUserByFields(Long id, Map<String, Object> fields) {
         if (fields == null || fields.isEmpty()) {
@@ -46,7 +42,7 @@ public class UserProfilesServiceImpl extends ServiceImpl<UserProfilesMapper, Use
             }
         });
 
-        userProfilesMapper.update(null, updateWrapper);
-        return userProfilesMapper.selectById(id);
+        update(null, updateWrapper);
+        return getById(id);
     }
 }

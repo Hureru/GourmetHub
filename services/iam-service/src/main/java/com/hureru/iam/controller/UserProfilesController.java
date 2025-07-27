@@ -2,6 +2,7 @@ package com.hureru.iam.controller;
 
 
 import com.hureru.common.R;
+import com.hureru.iam.bean.UserProfiles;
 import com.hureru.iam.service.IUserProfilesService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,8 +32,11 @@ public class UserProfilesController {
      */
     @GetMapping("/users/me")
     public R me(/*@AuthenticationPrincipal Jwt jwt,*/) {
-        // TODO 实现获取个人资料逻辑
-        return R.ok();
+        // TODO 从JWT中获取用户ID
+        Long userId = 1L;
+        // 实现获取个人资料逻辑
+        UserProfiles profile = userProfilesService.getById(userId);
+        return R.ok("获取成功", profile);
     }
 
     /**
