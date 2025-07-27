@@ -28,7 +28,6 @@ public class AddressesController {
     private final IAddressesService addressesService;
     /**
      * 受保护接口, 获取当前用户所有配送地址
-     *
      * @return {@code 200 OK}所有配送地址
      */
     @GetMapping("/users/me/addresses")

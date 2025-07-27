@@ -38,11 +38,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HandlerMethodValidationException.class)
     public ResponseEntity<R> handleMethodValidation(HandlerMethodValidationException ex) {
         Map<String, String> errors = new HashMap<>();
-        ex.getAllValidationResults().forEach(result -> {
-            result.getResolvableErrors().forEach(error -> {
-                errors.put(result.getMethodParameter().getParameterName(), error.getDefaultMessage());
-            });
-        });
+        ex.getAllValidationResults().forEach(result -> result.getResolvableErrors().forEach(error -> errors.put(result.getMethodParameter().getParameterName(), error.getDefaultMessage())));
         log.error("[Method]参数验证失败: {}", errors);
         return ResponseEntity.badRequest()
                 .body(R.error(400, "参数校验失败：" + errors));
