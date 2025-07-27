@@ -1,7 +1,7 @@
 package com.hureru.iam.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hureru.iam.oauth.dto.TokenResponse;
+import com.hureru.iam.oauth.TokenResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;

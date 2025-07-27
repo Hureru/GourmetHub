@@ -1,8 +1,8 @@
 package com.hureru.iam.exception;
 
 import com.hureru.common.R;
+import com.hureru.common.exception.BusinessException;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.ibatis.annotations.Result;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
@@ -30,7 +30,7 @@ public class GlobalExceptionHandler {
         Map<String, String> errors = new HashMap<>();
         bindingResult.getFieldErrors().forEach(error ->
                 errors.put(error.getField(), error.getDefaultMessage()));
-        log.error("参数验证失败：{}", errors);
+        log.error("[Binding]参数验证失败：{}", errors);
         return ResponseEntity.badRequest()
                 .body(R.error(400, "参数校验失败：" + errors));
     }
@@ -43,7 +43,7 @@ public class GlobalExceptionHandler {
                 errors.put(result.getMethodParameter().getParameterName(), error.getDefaultMessage());
             });
         });
-        log.error("参数验证失败: {}", errors);
+        log.error("[Method]参数验证失败: {}", errors);
         return ResponseEntity.badRequest()
                 .body(R.error(400, "参数校验失败：" + errors));
     }
@@ -60,4 +60,6 @@ public class GlobalExceptionHandler {
         log.error("数据已存在: {}", e.getMessage());
         return ResponseEntity.badRequest().body(R.error(409, "数据已存在"));
     }
+
+    //TODO 添加令牌无效或缺失异常处理 {@code 401 Unauthorized}
 }

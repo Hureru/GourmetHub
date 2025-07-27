@@ -1,4 +1,4 @@
-package com.hureru.iam.oauth.dto;
+package com.hureru.iam.oauth;
 
 import lombok.Data;
 
