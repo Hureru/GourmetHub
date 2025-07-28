@@ -19,24 +19,40 @@
 
     <dependencies>
 
-        <!-- 新增：Spring Boot Security Starter -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-mysql</artifactId>
+        </dependency>
+<!--    未使用，但会自动加载，添加消除报错-->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-cas</artifactId>
+        </dependency>
+
+        <!-- Spring Boot Security Starter -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
 
-        <!-- 新增：Spring Security OAuth2 Authorization Server -->
+        <!-- Spring Security OAuth2 Authorization Server -->
         <!-- 用于构建 OAuth2 授权服务器，处理令牌的颁发和校验 -->
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-oauth2-authorization-server</artifactId>
         </dependency>
 
-        <!-- 新增：Spring Boot OAuth2 Resource Server Starter -->
+        <!-- Spring Boot OAuth2 Resource Server Starter -->
         <!-- 用于保护您的 API 端点，验证传入的 JWT 令牌 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+        </dependency>
+
+        <!--  Spring Boot Starter JDBC -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jdbc</artifactId>
         </dependency>
 
 
