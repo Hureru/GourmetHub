@@ -47,5 +47,7 @@ public class OrderItems implements Serializable {
     @ApiModelProperty(value = "下单时的单价快照")
     private BigDecimal priceAtPurchase;
 
+    @ApiModelProperty(value = "商品状态")
+    private Orders.Status shippingStatus;
 
 }
