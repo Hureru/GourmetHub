@@ -1,5 +1,6 @@
 package com.hureru.iam.service;
 
+import com.hureru.iam.RoleEnum;
 import com.hureru.iam.bean.UserRoleMapping;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -12,5 +13,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @since 2025-07-26
  */
 public interface IUserRoleMappingService extends IService<UserRoleMapping> {
-
+    void updateUserRole(Long userId, Long updateId, RoleEnum role);
 }
