@@ -44,9 +44,8 @@ public class UsersController {
     public R register(@Valid @RequestBody UserDTO userDTO) {
         // 用户注册
         Users user = usersService.userRegister(userDTO.getEmail(), userDTO.getPassword(), userDTO.getNickname());
-        userDTO.setUserId(user.getId());
-        log.info("用户注册：{}", userDTO);
-        return R.ok(201, "用户注册成功", userDTO);
+        log.info("用户注册：{}", user);
+        return R.ok(201, "用户注册成功", user);
     }
 
 }

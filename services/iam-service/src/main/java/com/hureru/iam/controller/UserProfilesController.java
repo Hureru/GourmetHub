@@ -7,6 +7,7 @@ import com.hureru.iam.dto.UserProfileDTO;
 import com.hureru.iam.service.IUserProfilesService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1")
+@PreAuthorize("hasAuthority('SCOPE_userprofile')")
 public class UserProfilesController {
     private final IUserProfilesService userProfilesService;
     /**
