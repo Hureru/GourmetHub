@@ -21,6 +21,15 @@ public enum RoleEnum {
         this.code = code;
     }
 
+    public static RoleEnum getRole(Integer roleId) {
+        for (RoleEnum role : RoleEnum.values()) {
+            if (role.code == roleId) {
+                return role;
+            }
+        }
+        return null;
+    }
+
     // 替代ordinal()方法
     public int getIndex() {
         return code;

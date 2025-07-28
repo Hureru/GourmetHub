@@ -6,6 +6,14 @@ spring:
     username: root
     password: 123456
     driver-class-name: com.mysql.cj.jdbc.Driver
+  authorization-server:
+    # 配置JWT签发者URI，必须和授权服务器的地址一致
+    issuer: http://localhost:10000
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:10000
 server:
   port: 10000
 
@@ -16,3 +24,8 @@ mybatis-plus:
       id-type: auto # (可选) 主键自增
   configuration:  # 开启日志
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl # (可选)
+
+logging:
+  level:
+    com.hureru.iam.mapper: debug
+    org.springframework.security: debug

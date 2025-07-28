@@ -1,18 +1,34 @@
 package com.hureru.iam.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.hureru.iam.bean.Roles;
 import com.hureru.iam.bean.UserProfiles;
 import com.hureru.iam.bean.UserRoleMapping;
 import com.hureru.iam.bean.Users;
 import com.hureru.common.exception.BusinessException;
+import com.hureru.iam.mapper.RolesMapper;
 import com.hureru.iam.mapper.UserProfilesMapper;
 import com.hureru.iam.mapper.UserRoleMappingMapper;
 import com.hureru.iam.mapper.UsersMapper;
+import com.hureru.iam.service.IRolesService;
 import com.hureru.iam.service.IUsersService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -22,17 +38,58 @@ import org.springframework.transaction.annotation.Transactional;
  * @author zheng
  * @since 2025-07-26
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
-public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements IUsersService {
+public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements IUsersService, UserDetailsService {
     private final UserProfilesMapper userProfilesMapper;
     private final UserRoleMappingMapper userRoleMappingMapper;
+    private final RolesMapper rolesMapper;
+    private final PasswordEncoder passwordEncoder;
+
+    /**
+     * 根据用户名加载用户信息，供 Spring Security 调用。
+     * @param email 用户账号
+     * @return UserDetails 包含用户信息和权限
+     * @throws UsernameNotFoundException 如果用户不存在
+     */
+    @Override
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        // 1. 根据用户名查询用户
+        Users user = getOne(new QueryWrapper<Users>().eq("email", email));
+        if (user == null) {
+            log.error("查询账号失败: " + email);
+            throw new UsernameNotFoundException(String.format("账号 %s 不存在", email));
+        }
+
+        // 2. 查询用户的角色映射
+        List<UserRoleMapping> roleMappings = userRoleMappingMapper.selectList(new QueryWrapper<UserRoleMapping>().eq("user_id", user.getId()));
+        if (roleMappings.isEmpty()) {
+            // 如果用户没有角色，返回一个没有权限的 User 对象
+            return new User(user.getEmail(), user.getPasswordHash(), Collections.emptyList());
+        }
+
+        // 3. 根据角色ID查询角色信息
+        List<Integer> roleIds = roleMappings.stream().map(UserRoleMapping::getRoleId).collect(Collectors.toList());
+        List<Roles> roles = rolesMapper.selectBatchIds(roleIds);
+
+        // 4. 构建权限列表 (Spring Security 需要 'ROLE_' 前缀)
+        List<GrantedAuthority> authorities = roles.stream()
+                .map(role -> new SimpleGrantedAuthority(role.getName().toUpperCase()))
+                .collect(Collectors.toList());
+
+        // 5. 返回 Spring Security 的 User 对象
+        return new User(user.getEmail(), user.getPasswordHash(), authorities);
+    }
 
     @Override
     @Transactional
     public Users userRegister(String email, String password, String nickname) {
         // 添加 用户
-        Users user = new Users(email, password);
+        // 对密码进行加密
+        String encodedPassword = passwordEncoder.encode(password);
+
+        Users user = new Users(email, encodedPassword);
         try {
             save(user);
         } catch (DuplicateKeyException e) {
