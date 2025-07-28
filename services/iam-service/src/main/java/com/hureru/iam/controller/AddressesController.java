@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static com.hureru.common.utils.JwtUtil.getUserIdFromJwt;
 
 /**
  * <p>
