@@ -14,6 +14,7 @@ public class R {
     public static R ok (){
         R r = new R();
         r.setCode(200);
+        r.setMsg("success");
         return r;
     }
 
