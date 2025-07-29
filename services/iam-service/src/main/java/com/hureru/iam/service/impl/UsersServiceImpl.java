@@ -82,8 +82,18 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
                 .map(role -> new SimpleGrantedAuthority(role.getName().toUpperCase()))
                 .collect(Collectors.toList());
 
+        boolean enabled = Users.Status.ACTIVE.equals(user.getStatus());
+        boolean accountNonLocked = !Users.Status.SUSPENDED.equals(user.getStatus());
+
         // 5. 返回 Spring Security 的 User 对象
-        return new User(user.getEmail(), user.getPasswordHash(), authorities);
+        return new User(
+                user.getEmail(),
+                user.getPasswordHash(),
+                enabled,
+                true,
+                true,
+                accountNonLocked,
+                authorities);
     }
 
     @Override
