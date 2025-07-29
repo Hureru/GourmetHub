@@ -5,10 +5,8 @@ import com.hureru.common.exception.BusinessException;
 import com.hureru.iam.RoleEnum;
 import com.hureru.iam.bean.UserRoleMapping;
 import com.hureru.iam.mapper.UserRoleMappingMapper;
-import com.hureru.iam.mapper.UsersMapper;
 import com.hureru.iam.service.IUserRoleMappingService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 /**
@@ -30,7 +28,7 @@ public class UserRoleMappingServiceImpl extends ServiceImpl<UserRoleMappingMappe
             throw new BusinessException(403, "无权操作");
         }
 
-        if (update(new UpdateWrapper<UserRoleMapping>().eq("user_id", updateId).set("role_id", role.getCode()))){
+        if (!update(new UpdateWrapper<UserRoleMapping>().eq("user_id", updateId).set("role_id", role.getCode()))){
             throw new BusinessException(500, "更新失败");
         }
     }
