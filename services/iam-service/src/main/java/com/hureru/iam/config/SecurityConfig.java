@@ -1,9 +1,12 @@
 package com.hureru.iam.config;
 
+import com.hureru.iam.exception.RestAccessDeniedHandler;
+import com.hureru.iam.exception.RestAuthenticationEntryPoint;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
+import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.core.io.Resource;
 import org.springframework.beans.factory.annotation.Value;
@@ -50,17 +53,23 @@ import java.util.UUID;
 
 /**
  * Spring Security 配置类
+ *
  * @author zheng
  */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
+@RequiredArgsConstructor
 @EnableConfigurationProperties(SecurityConfig.JwkProperties.class)
 public class SecurityConfig {
+    // 注入自定义处理器
+    private final RestAuthenticationEntryPoint restAuthenticationEntryPoint;
+    private final RestAccessDeniedHandler restAccessDeniedHandler;
 
     /**
      * 配置 OAuth2.0 授权服务器的安全过滤链。
      * 这个过滤器链负责处理所有到授权端点（如 /oauth2/authorize, /oauth2/token）的请求。
+     *
      * @param http HttpSecurity 配置器
      * @return SecurityFilterChain
      * @throws Exception 抛出异常
@@ -90,6 +99,7 @@ public class SecurityConfig {
     /**
      * 配置保护应用API资源的安全过滤链。
      * 这个过滤器链负责保护你的业务API（例如 /api/**）。
+     *
      * @param http HttpSecurity 配置器
      * @return SecurityFilterChain
      * @throws Exception 抛出异常
@@ -107,7 +117,10 @@ public class SecurityConfig {
                         // 其他所有请求都需要认证
                         .anyRequest().authenticated()
                 )
-                .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .jwt(Customizer.withDefaults())
+                        .authenticationEntryPoint(restAuthenticationEntryPoint) // 指定 401 错误处理器
+                        .accessDeniedHandler(restAccessDeniedHandler))
                 // 使用默认的表单登录页面
                 .formLogin(Customizer.withDefaults());
 
@@ -116,6 +129,7 @@ public class SecurityConfig {
 
     /**
      * 配置密码编码器，用于加密和验证用户密码。
+     *
      * @return PasswordEncoder
      */
     @Bean
@@ -125,6 +139,7 @@ public class SecurityConfig {
 
     /**
      * 配置基于 JDBC 的 OAuth2 客户端信息仓库。
+     *
      * @param jdbcTemplate JDBC 模板
      * @return RegisteredClientRepository
      */
@@ -135,7 +150,8 @@ public class SecurityConfig {
 
     /**
      * 配置基于 JDBC 的 OAuth2 授权服务。
-     * @param jdbcTemplate JDBC 模板
+     *
+     * @param jdbcTemplate               JDBC 模板
      * @param registeredClientRepository 客户端仓库
      * @return OAuth2AuthorizationService
      */
@@ -146,7 +162,8 @@ public class SecurityConfig {
 
     /**
      * 配置基于 JDBC 的 OAuth2 授权同意服务。
-     * @param jdbcTemplate JDBC 模板
+     *
+     * @param jdbcTemplate               JDBC 模板
      * @param registeredClientRepository 客户端仓库
      * @return OAuth2AuthorizationConsentService
      */
@@ -154,59 +171,6 @@ public class SecurityConfig {
     public OAuth2AuthorizationConsentService authorizationConsentService(JdbcTemplate jdbcTemplate, RegisteredClientRepository registeredClientRepository) {
         return new JdbcOAuth2AuthorizationConsentService(jdbcTemplate, registeredClientRepository);
     }
-
-
-
-//    /**
-//     * 配置 OAuth2 客户端信息。
-//     * 在生产环境中，您应该从数据库或其他持久化存储中加载客户端信息。
-//     * 这里为了演示，使用内存存储。
-//     * @return RegisteredClientRepository
-//     */
-//    @Bean
-//    public RegisteredClientRepository registeredClientRepository() {
-//
-//        // 定义 Token 的相关设置
-//        TokenSettings tokenSettings = TokenSettings.builder()
-//                // 设置 Access Token 的有效期为 7 天
-//                .accessTokenTimeToLive(Duration.ofDays(7))
-//                .build();
-//
-//        RegisteredClient oidcClient = RegisteredClient.withId(UUID.randomUUID().toString())
-//                // 将 tokenSettings 应用到这个客户端
-//                .tokenSettings(tokenSettings)
-//                // 客户端ID
-//                .clientId("gourmethub-client")
-//                // 客户端密钥
-//                .clientSecret(passwordEncoder().encode("secret"))
-//                // 客户端认证方式
-//                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
-//                // 授权码模式
-//                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-//                // 刷新令牌
-//                .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-//                // 回调地址
-//                .redirectUri("http://127.0.0.1:8080/login/oauth2/code/gourmethub-client")
-//                // 登出后重定向地址
-//                .postLogoutRedirectUri("http://127.0.0.1:8080/")
-//                // OIDC范围
-//                .scope(OidcScopes.OPENID)
-//                // OIDC范围
-//                .scope(OidcScopes.PROFILE)
-//                // 自定义范围
-//                .scope("read")
-//                // 自定义范围
-//                .scope("write")
-//                .clientSettings(ClientSettings.builder()
-//                        // 要求用户同意授权
-//                        .requireAuthorizationConsent(true)
-//                        // 启用 PKCE
-//                        .requireProofKey(true)
-//                        .build())
-//                .build();
-//
-//        return new InMemoryRegisteredClientRepository(oidcClient);
-//    }
 
     /**
      * 定义一个配置类来接收 application.yml 中的 jwt.keystore 配置
@@ -218,11 +182,13 @@ public class SecurityConfig {
             String alias,
             String keyPassword,
             String keyId
-    ) {}
+    ) {
+    }
 
     /**
      * 配置 JWK (JSON Web Key) 源，用于签名JWT。
      * 现在它从 JKS 密钥库文件中加载持久化的密钥。
+     *
      * @param jwkProperties 密钥库配置属性
      * @return JWKSource
      */
@@ -249,48 +215,16 @@ public class SecurityConfig {
                     .build();
 
             JWKSet jwkSet = new JWKSet(rsaKey);
-            System.out.println("🔐 JKS loaded successfully: "+jwkSet);
+            System.out.println("🔐 JKS loaded successfully: " + jwkSet);
             return (jwkSelector, securityContext) -> jwkSelector.select(jwkSet);
         } catch (Exception e) {
             throw new IllegalStateException("无法加载密钥库", e);
         }
     }
 
-//    /**
-//     * 配置 JWK (JSON Web Key) 源，用于签名JWT。
-//     * @return JWKSource
-//     */
-//    @Bean
-//    public JWKSource<SecurityContext> jwkSource() {
-//        KeyPair keyPair = generateRsaKey();
-//        RSAPublicKey publicKey = (RSAPublicKey) keyPair.getPublic();
-//        RSAPrivateKey privateKey = (RSAPrivateKey) keyPair.getPrivate();
-//        RSAKey rsaKey = new RSAKey.Builder(publicKey)
-//                .privateKey(privateKey)
-//                .keyID(UUID.randomUUID().toString())
-//                .build();
-//        JWKSet jwkSet = new JWKSet(rsaKey);
-//        return new ImmutableJWKSet<>(jwkSet);
-//    }
-//
-//    /**
-//     * 生成用于JWT签名的RSA密钥对。
-//     * @return KeyPair
-//     */
-//    private static KeyPair generateRsaKey() {
-//        KeyPair keyPair;
-//        try {
-//            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-//            keyPairGenerator.initialize(2048);
-//            keyPair = keyPairGenerator.generateKeyPair();
-//        } catch (Exception ex) {
-//            throw new IllegalStateException(ex);
-//        }
-//        return keyPair;
-//    }
-
     /**
      * 配置 JWT 解码器。
+     *
      * @param jwkSource JWK源
      * @return JwtDecoder
      */
@@ -301,6 +235,7 @@ public class SecurityConfig {
 
     /**
      * 配置授权服务器的设置，例如签发者URI。
+     *
      * @return AuthorizationServerSettings
      */
     @Bean
