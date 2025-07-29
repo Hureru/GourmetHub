@@ -16,6 +16,12 @@ spring:
   cloud:
     nacos:
       server-addr: 127.0.0.1:8848
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:10000
+
 
 server:
   port: 30000

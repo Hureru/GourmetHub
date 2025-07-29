@@ -27,6 +27,20 @@
     </properties>
 
     <dependencies>
+
+        <!-- Spring Boot Security Starter -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+
+        <!-- Spring Security OAuth2 Authorization Server -->
+        <!-- 用于构建 OAuth2 授权服务器，处理令牌的颁发和校验 -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-oauth2-authorization-server</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>com.hureru</groupId>
             <artifactId>module</artifactId>
