@@ -9,11 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * <p>
@@ -33,7 +29,7 @@ public class UserRoleMappingController {
      * 受保护接口，仅管理员，修改用户权限为 管理员
      * @param jwt 用户令牌
      */
-    @PutMapping("/users/{id}/admin")
+    @PatchMapping("/users/{id}/admin")
     public R updateUserRoleAdmin(@AuthenticationPrincipal Jwt jwt, @PathVariable Long id) {
         // 从JWT中获取用户ID
         Long userId = JwtUtil.getUserIdFromJwt(jwt);
@@ -45,7 +41,7 @@ public class UserRoleMappingController {
      * 受保护接口，仅管理员，修改用户权限为 审核
      * @param jwt 用户令牌
      */
-    @PutMapping("/users/{id}/moderator")
+    @PatchMapping("/users/{id}/moderator")
     public R updateUserRoleModerator(@AuthenticationPrincipal Jwt jwt, @PathVariable Long id) {
         // 从JWT中获取用户ID
         Long userId = JwtUtil.getUserIdFromJwt(jwt);

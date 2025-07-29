@@ -50,7 +50,7 @@ public class UserProfilesController {
      * @return {@code 200 OK} 返回 success
      * {@code 401 Unauthorized} 令牌无效或缺失
      */
-    @PutMapping("/users/me")
+    @PatchMapping("/users/me")
     public R updateMe(@AuthenticationPrincipal Jwt jwt, @Valid @RequestBody UserProfileDTO userProfile) {
         // 从JWT中获取用户ID
         Long userId = JwtUtil.getUserIdFromJwt(jwt);

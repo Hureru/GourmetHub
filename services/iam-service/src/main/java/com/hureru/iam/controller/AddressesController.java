@@ -67,7 +67,7 @@ public class AddressesController {
      * @param address 配送地址更新信息
      * @return {@code 200 OK} 成功返回 success
      */
-    @PutMapping("/users/me/addresses/{id}")
+    @PatchMapping("/users/me/addresses/{id}")
     public R updateAddress(@AuthenticationPrincipal Jwt jwt, @PathVariable("id") Long addrId, @Validated(Update.class) @RequestBody AddressDTO address){
         // 从JWT中获取用户ID
         Long userId = JwtUtil.getUserIdFromJwt(jwt);
@@ -82,7 +82,7 @@ public class AddressesController {
      * @param addrId 配送地址ID
      * @return {@code 200 OK}
      */
-    @PutMapping("/users/me/addresses/{id}/default")
+    @PatchMapping("/users/me/addresses/{id}/default")
     public R updateDefaultAddr(@AuthenticationPrincipal Jwt jwt, @PathVariable("id")Long addrId){
         // 从JWT中获取用户ID
         Long userId = JwtUtil.getUserIdFromJwt(jwt);
