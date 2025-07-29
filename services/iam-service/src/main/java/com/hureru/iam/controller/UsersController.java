@@ -3,7 +3,7 @@ package com.hureru.iam.controller;
 
 import com.hureru.common.R;
 import com.hureru.iam.bean.Users;
-import com.hureru.iam.dto.UserDTO;
+import com.hureru.order.dto.UserDTO;
 import com.hureru.iam.service.IUsersService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +37,7 @@ public class UsersController {
      *   "createdAt": "2023-10-27T10:30:00.123Z"
      * }
      * </pre>
-     * {@code 400 Bad Request} 输入验证失败
+     * {@code 400 Bad Request} 输入参数验证失败
      * {@code 409 Conflict} 邮箱已存在
      */
     @PostMapping("/users/register")

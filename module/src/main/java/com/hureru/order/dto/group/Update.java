@@ -1,4 +1,4 @@
-package com.hureru.iam.dto.group;
+package com.hureru.order.dto.group;
 
 /**
  * @author zheng

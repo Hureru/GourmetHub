@@ -2,7 +2,7 @@ package com.hureru.iam.service;
 
 import com.hureru.iam.bean.Addresses;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.hureru.iam.dto.AddressDTO;
+import com.hureru.order.dto.AddressDTO;
 
 import java.util.List;
 

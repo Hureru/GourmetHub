@@ -1,4 +1,4 @@
-package com.hureru.iam.dto;
+package com.hureru.order.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
