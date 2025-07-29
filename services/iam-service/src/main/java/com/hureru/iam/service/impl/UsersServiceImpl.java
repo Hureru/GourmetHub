@@ -139,6 +139,7 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
         UpdateWrapper<Users> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("id", userId);
         updateWrapper.eq("is_artisan", true);
+        updateWrapper.eq("status", Users.Status.PENDING_VERIFICATION);
         if (active){
             updateWrapper.set("status", Users.Status.ACTIVE);
         }else{

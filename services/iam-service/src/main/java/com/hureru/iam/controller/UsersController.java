@@ -89,7 +89,7 @@ public class UsersController {
     }
 
     /**
-     * 激活/禁用商家
+     * 激活/禁用 (待审核商家)
      *
      * @param id 用户ID
      * @return 激活结果
@@ -109,8 +109,11 @@ public class UsersController {
      */
     @PreAuthorize("hasAuthority('SCOPE_users.status.update')")
     @PatchMapping("users/{id}/status")
-    public R updateUserStatus(@PathVariable String id, @RequestParam Users.Status status) {
-        usersService.updateUserStatus(id, status);
+    public R updateUserStatus(@PathVariable String id, @RequestParam Integer status) {
+        log.info("status：{}", status);
+        Users.Status statusEnum = Users.Status.values()[status];
+        log.info("更新状态为：{}", statusEnum);
+        usersService.updateUserStatus(id, statusEnum);
         return R.ok();
     }
 }
