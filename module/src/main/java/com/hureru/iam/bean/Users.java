@@ -9,6 +9,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 /**
@@ -20,9 +21,10 @@ import lombok.experimental.Accessors;
  * @since 2025-07-26
  */
 @Data
-@EqualsAndHashCode(callSuper = false)
-@Accessors(chain = true)
+@NoArgsConstructor
 @TableName("users")
+@Accessors(chain = true)
+@EqualsAndHashCode(callSuper = false)
 @ApiModel(value="Users对象", description="存储用户核心认证信息的表")
 public class Users implements Serializable {
 
@@ -56,6 +58,5 @@ public class Users implements Serializable {
     public Users(String email, String password) {
         this.email = email;
         this.passwordHash = password;
-        this.status = Status.ACTIVE;
     }
 }
