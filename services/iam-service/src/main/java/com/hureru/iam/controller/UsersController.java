@@ -10,8 +10,11 @@ import com.hureru.product_artisan.dto.ArtisanDTO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * <p>
@@ -74,5 +77,40 @@ public class UsersController {
         return R.ok(201, "商家注册成功", user);
     }
 
+    /**
+     * 受保护接口，仅限product_artisan-service 服务调用，获取待审核用户列表
+     *
+     * @return 待审核用户ID列表
+     */
+    // TODO GetaWay 保护
+    @GetMapping("users/pending")
+    public List<String> getPendingUsers() {
+        return usersService.getPendingUserIds();
+    }
 
+    /**
+     * 激活/禁用商家
+     *
+     * @param id 用户ID
+     * @return 激活结果
+     */
+    @PreAuthorize("hasAuthority('SCOPE_artisan.active')")
+    @PatchMapping("artisan/{id}/active")
+    public R activeUser(@PathVariable String id, @RequestParam Boolean active) {
+        usersService.activateArtisan(id, active);
+        return R.ok();
+    }
+
+    /**
+     * 更新用户状态
+     *
+     * @param id 用户ID
+     * @return 更新结果
+     */
+    @PreAuthorize("hasAuthority('SCOPE_users.status.update')")
+    @PatchMapping("users/{id}/status")
+    public R updateUserStatus(@PathVariable String id, @RequestParam Users.Status status) {
+        usersService.updateUserStatus(id, status);
+        return R.ok();
+    }
 }

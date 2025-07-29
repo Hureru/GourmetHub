@@ -31,8 +31,10 @@ public class JwtTokenCustomizer implements OAuth2TokenCustomizer<JwtEncodingCont
     final Map<String, List<String>> roleToScopes = new HashMap<>()
     {
         {
-            put("ROLE_ADMIN", List.of("role", "userprofile"));
-            put("ROLE_MODERATOR", List.of());
+            put("ROLE_ADMIN", List.of("role", "userprofile",
+                    "artisan.active", "users.status.update",
+                    "artisans.get"));
+            put("ROLE_MODERATOR", List.of("artisan.active"));
             put("ROLE_ARTISAN", List.of());
             put("ROLE_USER", List.of("address", "userprofile"));
         }

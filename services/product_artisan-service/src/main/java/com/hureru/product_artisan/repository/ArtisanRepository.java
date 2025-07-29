@@ -13,4 +13,7 @@ import java.util.List;
 public interface ArtisanRepository  extends MongoRepository<Artisan, String> {
 
     List<Artisan> findByName(String name);
+    // 根据ID列表获取 商家列表
+    List<Artisan> findByIdIn(List<String> ids);
+
 }

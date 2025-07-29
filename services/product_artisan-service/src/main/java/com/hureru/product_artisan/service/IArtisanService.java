@@ -14,6 +14,7 @@ public interface IArtisanService {
     Artisan saveArtisan(ArtisanDTO dto);
     Optional<Artisan> getArtisanById(String id);
     List<Artisan> getAllArtisans();
+    List<Artisan> getPendingArtisans();
     List<Artisan> getArtisansByName(String name);
     void deleteArtisan(String id);
 }

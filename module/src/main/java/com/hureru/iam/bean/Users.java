@@ -43,6 +43,9 @@ public class Users implements Serializable {
     @ApiModelProperty(value = "用户账户状态")
     private Status status;
 
+    @ApiModelProperty(value = "是否商家")
+    private Boolean isArtisan;
+
     @ApiModelProperty(value = "记录创建时间")
     private LocalDateTime createdAt;
 

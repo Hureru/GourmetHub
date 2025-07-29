@@ -6,11 +6,11 @@ import com.hureru.product_artisan.dto.ArtisanDTO;
 import com.hureru.product_artisan.service.IArtisanService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * <p>
@@ -38,5 +38,14 @@ public class ArtisanController {
     public Artisan addArtisan(@RequestBody @Validated(Update.class) ArtisanDTO artisanDTO) {
         log.info("调用[addArtisan]:{}", artisanDTO);
         return artisanService.saveArtisan(artisanDTO);
+    }
+
+    /**
+     * 获取所有待审核的商家
+     */
+    @PreAuthorize("hasAuthority('SCOPE_artisans.get')")
+    @GetMapping("/artisan/pending")
+    public List<Artisan> getPendingArtisans() {
+        return artisanService.getPendingArtisans();
     }
 }

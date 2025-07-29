@@ -113,7 +113,10 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests((authorize) -> authorize
                         // 公开访问注册、登录和错误页面
-                        .requestMatchers("/api/v1/register/*", "/login", "/error").permitAll()
+                        .requestMatchers("/api/v1/register/*",
+                                "/api/v1/users/pending",
+                                "/login",
+                                "/error").permitAll()
                         // 其他所有请求都需要认证
                         .anyRequest().authenticated()
                 )

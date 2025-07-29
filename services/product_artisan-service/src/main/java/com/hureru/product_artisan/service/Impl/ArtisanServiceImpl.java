@@ -2,6 +2,7 @@ package com.hureru.product_artisan.service.Impl;
 
 import com.hureru.product_artisan.bean.Artisan;
 import com.hureru.product_artisan.dto.ArtisanDTO;
+import com.hureru.product_artisan.feign.UserFeignClient;
 import com.hureru.product_artisan.repository.ArtisanRepository;
 import com.hureru.product_artisan.service.IArtisanService;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ArtisanServiceImpl implements IArtisanService {
     private final ArtisanRepository artisanRepository;
+    private final UserFeignClient userFeignClient;
 
     @Override
     public Artisan saveArtisan(Artisan artisan) {
@@ -45,6 +47,12 @@ public class ArtisanServiceImpl implements IArtisanService {
     @Override
     public List<Artisan> getAllArtisans() {
         return artisanRepository.findAll();
+    }
+
+    @Override
+    public List<Artisan> getPendingArtisans() {
+        List<String> userIds = userFeignClient.getPendingUsers();
+        return artisanRepository.findByIdIn(userIds);
     }
 
     @Override

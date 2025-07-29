@@ -1,6 +1,7 @@
 package com.hureru.iam.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.hureru.iam.RoleEnum;
 import com.hureru.iam.bean.Roles;
 import com.hureru.iam.bean.UserProfiles;
@@ -126,6 +127,39 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
         return user;
     }
 
+    @Override
+    public List<String> getPendingUserIds() {
+        QueryWrapper<Users> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("status", Users.Status.PENDING_VERIFICATION);
+        return list(queryWrapper).stream().map(user -> String.valueOf(user.getId())).toList();
+    }
+
+    @Override
+    public void activateArtisan(String userId, Boolean active) {
+        UpdateWrapper<Users> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("id", userId);
+        updateWrapper.eq("is_artisan", true);
+        if (active){
+            updateWrapper.set("status", Users.Status.ACTIVE);
+        }else{
+            updateWrapper.set("status", Users.Status.SUSPENDED);
+        }
+
+        if (!update(updateWrapper)){
+            throw new BusinessException(500, "更新失败");
+        }
+    }
+
+    @Override
+    public void updateUserStatus(String userId, Users.Status status) {
+        UpdateWrapper<Users> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("id", userId);
+        updateWrapper.set("status", status);
+        if (!update(updateWrapper)){
+            throw new BusinessException(500, "更新失败");
+        }
+    }
+
     private Users register(String email, String password, boolean isUser){
         // 添加 用户
         // 对密码进行加密
@@ -134,6 +168,8 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
         Users user = new Users(email, encodedPassword);
         if (isUser){
             user.setStatus(Users.Status.ACTIVE);
+        }else {
+            user.setIsArtisan(true);
         }
         try {
             save(user);
