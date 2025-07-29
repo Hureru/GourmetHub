@@ -1,6 +1,7 @@
 package com.hureru.product_artisan.service.Impl;
 
 import com.hureru.product_artisan.bean.Artisan;
+import com.hureru.product_artisan.dto.ArtisanDTO;
 import com.hureru.product_artisan.repository.ArtisanRepository;
 import com.hureru.product_artisan.service.IArtisanService;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,20 @@ public class ArtisanServiceImpl implements IArtisanService {
 
     @Override
     public Artisan saveArtisan(Artisan artisan) {
+        return artisanRepository.save(artisan);
+    }
+
+    @Override
+    public Artisan saveArtisan(ArtisanDTO dto) {
+        Artisan artisan = new Artisan();
+        artisan.setId(dto.getId());
+        artisan.setName(dto.getName());
+        artisan.setBrandStory(dto.getBrandStory());
+        artisan.setLocation(dto.getLocation());
+        artisan.setLogoUrl(dto.getLogoUrl());
+        artisan.setCertifications(dto.getCertifications());
+        artisan.setCreatedAt(java.time.LocalDateTime.now().toString());
+        artisan.setUpdatedAt(java.time.LocalDateTime.now().toString());
         return artisanRepository.save(artisan);
     }
 
