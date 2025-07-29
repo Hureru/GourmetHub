@@ -1,10 +1,13 @@
 package com.hureru.iam.controller;
 
 
+import com.hureru.common.utils.JwtUtil;
 import com.hureru.iam.RoleEnum;
 import com.hureru.iam.service.IUserRoleMappingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,22 +30,24 @@ public class UserRoleMappingController {
     private final IUserRoleMappingService userRoleMappingService;
     /**
      * 受保护接口，仅管理员，修改用户权限为管理员
+     * @param jwt 用户令牌
      */
     @PutMapping("/users/{id}/admin")
-    public String updateUserRoleAdmin(/*@AuthenticationPrincipal Jwt jwt,*/ @PathVariable Long id) {
-        // TODO 从JWT中获取用户ID
-        Long userId = 1L;
+    public String updateUserRoleAdmin(@AuthenticationPrincipal Jwt jwt, @PathVariable Long id) {
+        // 从JWT中获取用户ID
+        Long userId = JwtUtil.getUserIdFromJwt(jwt);
         userRoleMappingService.updateUserRole(id, userId, RoleEnum.ROLE_ADMIN);
         return "success";
     }
 
     /**
      * 受保护接口，仅管理员，修改用户权限为审核
+     * @param jwt 用户令牌
      */
     @PutMapping("/users/{id}/moderator")
-    public String updateUserRoleModerator(/*@AuthenticationPrincipal Jwt jwt,*/ @PathVariable Long id) {
-        // TODO 从JWT中获取用户ID
-        Long userId = 1L;
+    public String updateUserRoleModerator(@AuthenticationPrincipal Jwt jwt, @PathVariable Long id) {
+        // 从JWT中获取用户ID
+        Long userId = JwtUtil.getUserIdFromJwt(jwt);
         userRoleMappingService.updateUserRole(id, userId, RoleEnum.ROLE_MODERATOR);
         return "success";
     }
