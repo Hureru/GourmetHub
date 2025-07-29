@@ -1,7 +1,7 @@
 package com.hureru.product_artisan.dto;
 
-import com.hureru.order.dto.group.Create;
-import com.hureru.order.dto.group.Update;
+import com.hureru.iam.dto.group.Create;
+import com.hureru.iam.dto.group.Update;
 import com.hureru.product_artisan.bean.Artisan;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

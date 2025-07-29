@@ -3,7 +3,7 @@ package com.hureru.iam.service.impl;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.hureru.common.exception.BusinessException;
 import com.hureru.iam.bean.UserProfiles;
-import com.hureru.order.dto.UserProfileDTO;
+import com.hureru.iam.dto.UserProfileDTO;
 import com.hureru.iam.mapper.UserProfilesMapper;
 import com.hureru.iam.service.IUserProfilesService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;

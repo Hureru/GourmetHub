@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.hureru.common.exception.BusinessException;
 import com.hureru.iam.bean.Addresses;
-import com.hureru.order.dto.AddressDTO;
+import com.hureru.iam.dto.AddressDTO;
 import com.hureru.iam.mapper.AddressesMapper;
 import com.hureru.iam.service.IAddressesService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;

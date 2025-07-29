@@ -3,9 +3,9 @@ package com.hureru.iam.controller;
 
 import com.hureru.common.R;
 import com.hureru.iam.bean.Users;
-import com.hureru.order.dto.UserDTO;
+import com.hureru.iam.dto.UserDTO;
 import com.hureru.iam.service.IUsersService;
-import com.hureru.order.dto.group.Create;
+import com.hureru.iam.dto.group.Create;
 import com.hureru.product_artisan.dto.ArtisanDTO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

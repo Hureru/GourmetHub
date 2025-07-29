@@ -4,7 +4,7 @@ package com.hureru.iam.controller;
 import com.hureru.common.R;
 import com.hureru.common.utils.JwtUtil;
 import com.hureru.iam.bean.UserProfiles;
-import com.hureru.order.dto.UserProfileDTO;
+import com.hureru.iam.dto.UserProfileDTO;
 import com.hureru.iam.service.IUserProfilesService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

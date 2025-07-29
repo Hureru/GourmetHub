@@ -2,7 +2,7 @@ package com.hureru.iam.service;
 
 import com.hureru.iam.bean.UserProfiles;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.hureru.order.dto.UserProfileDTO;
+import com.hureru.iam.dto.UserProfileDTO;
 
 
 /**
