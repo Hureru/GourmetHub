@@ -2,6 +2,7 @@ package com.hureru.iam.service;
 
 import com.hureru.iam.bean.Users;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.hureru.product_artisan.dto.ArtisanDTO;
 
 /**
  * <p>
@@ -13,4 +14,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface IUsersService extends IService<Users> {
     Users userRegister(String email, String password, String nickname);
+
+    Users artisanRegister(ArtisanDTO artisanDTO);
 }

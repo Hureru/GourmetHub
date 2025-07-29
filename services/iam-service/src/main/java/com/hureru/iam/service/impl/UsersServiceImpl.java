@@ -1,18 +1,21 @@
 package com.hureru.iam.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.hureru.iam.RoleEnum;
 import com.hureru.iam.bean.Roles;
 import com.hureru.iam.bean.UserProfiles;
 import com.hureru.iam.bean.UserRoleMapping;
 import com.hureru.iam.bean.Users;
 import com.hureru.common.exception.BusinessException;
+import com.hureru.iam.feign.ArtisanFeignClient;
 import com.hureru.iam.mapper.RolesMapper;
 import com.hureru.iam.mapper.UserProfilesMapper;
 import com.hureru.iam.mapper.UserRoleMappingMapper;
 import com.hureru.iam.mapper.UsersMapper;
-import com.hureru.iam.service.IRolesService;
 import com.hureru.iam.service.IUsersService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.hureru.product_artisan.bean.Artisan;
+import com.hureru.product_artisan.dto.ArtisanDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
@@ -46,6 +49,7 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
     private final UserRoleMappingMapper userRoleMappingMapper;
     private final RolesMapper rolesMapper;
     private final PasswordEncoder passwordEncoder;
+    private final ArtisanFeignClient artisanFeignClient;
 
     /**
      * 根据用户名加载用户信息，供 Spring Security 调用。
@@ -85,11 +89,42 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
     @Override
     @Transactional
     public Users userRegister(String email, String password, String nickname) {
+        Users user = register(email, password, true);
+        user.setStatus(Users.Status.ACTIVE);
+        // 添加 用户信息
+        UserProfiles userProfile = new UserProfiles(user.getId(), nickname);
+        userProfilesMapper.insert(userProfile);
+        // 添加 用户角色映射
+        UserRoleMapping userRoleMapping = new UserRoleMapping(user.getId(), RoleEnum.ROLE_USER.getCode());
+        userRoleMappingMapper.insert(userRoleMapping);
+        return user;
+    }
+
+    @Override
+    @Transactional
+    //TODO OpenFeign 远程调用全局事务
+    public Users artisanRegister(ArtisanDTO artisanDTO) {
+        Users user = register(artisanDTO.getEmail(), artisanDTO.getPassword(), false);
+        // 添加 商家角色映射
+        UserRoleMapping userRoleMapping = new UserRoleMapping(user.getId(), RoleEnum.ROLE_ARTISAN.getCode());
+        userRoleMappingMapper.insert(userRoleMapping);
+        // 调用 product_artisan-service 服务 注册商家信息
+        artisanDTO.setId(String.valueOf(user.getId()));
+        Artisan artisan = artisanFeignClient.addArtisan(artisanDTO);
+        log.info("dto: {}", artisanDTO);
+        log.info("调用OpenFeign[artisanFeignClient.addArtisan]:{}", artisan);
+        return user;
+    }
+
+    private Users register(String email, String password, boolean isUser){
         // 添加 用户
         // 对密码进行加密
         String encodedPassword = passwordEncoder.encode(password);
 
         Users user = new Users(email, encodedPassword);
+        if (isUser){
+            user.setStatus(Users.Status.ACTIVE);
+        }
         try {
             save(user);
         } catch (DuplicateKeyException e) {
@@ -100,12 +135,6 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
             // 其他唯一键冲突
             throw e;
         }
-        // 添加 用户信息
-        UserProfiles userProfile = new UserProfiles(user.getId(), nickname);
-        userProfilesMapper.insert(userProfile);
-        // 添加 用户角色映射
-        UserRoleMapping userRoleMapping = new UserRoleMapping(user.getId(), 1);
-        userRoleMappingMapper.insert(userRoleMapping);
         return user;
     }
 }
