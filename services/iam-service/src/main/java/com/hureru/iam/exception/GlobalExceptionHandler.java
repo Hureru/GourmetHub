@@ -57,5 +57,4 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(R.error(409, "数据已存在"));
     }
 
-    //TODO 添加令牌无效或缺失异常处理 {@code 401 Unauthorized}
 }
