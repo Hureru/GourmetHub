@@ -1,50 +1,20 @@
 spring:
-  application:
-    name: iam-service
-  datasource:
-    url: jdbc:mysql://localhost:3307/db_iam?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
-    username: root
-    password: 123456
-    driver-class-name: com.mysql.cj.jdbc.Driver
-  authorization-server:
-    # 配置JWT签发者URI，必须和授权服务器的地址一致
-    issuer: http://localhost:10000
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: http://localhost:10000
-
+  profiles:
+    active: ${ENV:dev}
   cloud:
     nacos:
-      server-addr: 127.0.0.1:8848
+      config:
+        server-addr: 127.0.0.1:8848
+        namespace: "${spring.profiles.active}"
+        group: IAM_SERVICE
+  config:
+      import:
+        - nacos:iam.yaml
+        - nacos:database.yaml
+        - nacos:oauth.yaml
+        - nacos:nacos.yaml?group=COMMON
 
-#  flyway:
-#    baseline-on-migrate: true
-#    baseline-version: 1
 
-server:
-  port: 10000
 
-mybatis-plus:
-#  mapper-locations: classpath:/mapper/**/*.xml # (可选) 使用XML文件
-  global-config:
-    db-config:
-      id-type: auto # (可选) 主键自增
-  configuration:  # 开启日志
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl # (可选)
 
-# JWT 密钥库配置
-jwt:
-  keystore:
-    location: classpath:gourmethub.jks
-    store-password: "mystorepassword" # 密钥库密码
-    alias: "gourmethub-jwt-key"      # 密钥别名
-    key-password: "mystorepassword"    # 密钥密码
-    keyId: "P6xRdUR#v^!th%59dH!$xH%ZT%meoZih"
-
-logging:
-  level:
-    com.hureru.iam.mapper: debug
-    org.springframework.security: debug
 

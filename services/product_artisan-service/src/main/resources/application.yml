@@ -1,27 +1,18 @@
 spring:
-  application:
-    name: product-artisan-service
-  data:
-#    mongodb:
-##      uri: mongodb://localhost:27017/product_artisan_db
-#      # 如果需要用户名密码，使用以下格式：
-#       uri: mongodb://root:123456@localhost:27017/db_product_artisan
-    mongodb:
-      host: localhost
-      port: 27017
-      database: db_product_artisan
-      username: root
-      password: "123456"
-      authentication-database: admin
+  profiles:
+    active: ${ENV:dev}
   cloud:
     nacos:
-      server-addr: 127.0.0.1:8848
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: http://localhost:10000
-
-
-server:
-  port: 30000
+      config:
+        server-addr: 127.0.0.1:8848
+        namespace: "${spring.profiles.active}"
+        group: PRODUCT_ARTISAN_SERVICE
+  config:
+    import:
+      - nacos:product_artisan.yaml
+      - nacos:database.yaml
+      - nacos:resource_oauth.yaml?group=COMMON
+      - nacos:nacos.yaml?group=COMMON
+logging:
+  level:
+    com: debug
