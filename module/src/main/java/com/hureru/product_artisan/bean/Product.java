@@ -3,7 +3,9 @@ package com.hureru.product_artisan.bean;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -26,12 +28,16 @@ public class Product {
     private List<String> tags;
     private Map<String, Object> attributes;
     private Boolean isPublished;
-    private Date createdAt;
-    private Date updatedAt;
-
+    // 新增审核相关字段
+    private AuditInfo audit;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+//    @Version
+    private Long version;
     // 内部类 ArtisanInfo
     @Data
     public static class ArtisanInfo {
+        @Field("id")
         private String id;
         private String name;
     }
@@ -56,4 +62,20 @@ public class Product {
         }
     }
 
+    // 审核信息嵌入对象
+    @Data
+    public static class AuditInfo {
+        private Status status = Status.PENDING; // 默认待审状态
+        private LocalDateTime submitTime = LocalDateTime.now();
+        private LocalDateTime reviewTime;
+        private String reviewerId;
+        private String comment;
+
+        // 枚举定义
+        public enum Status {
+            PENDING,
+            APPROVED,
+            REJECTED;
+        }
+    }
 }
