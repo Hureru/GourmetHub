@@ -83,7 +83,7 @@ public class UsersController {
      * @return 待审核用户ID列表
      */
     // TODO GetaWay 保护
-    @GetMapping("users/pending")
+    @GetMapping("/internal/users/pending")
     public List<String> getPendingUsers() {
         return usersService.getPendingUserIds();
     }
@@ -95,7 +95,7 @@ public class UsersController {
      * @return 激活结果
      */
     @PreAuthorize("hasAuthority('SCOPE_artisan.active')")
-    @PatchMapping("artisan/{id}/active")
+    @PatchMapping("/artisan/{id}/active")
     public R activeUser(@PathVariable String id, @RequestParam Boolean active) {
         usersService.activateArtisan(id, active);
         return R.ok();
@@ -108,12 +108,18 @@ public class UsersController {
      * @return 更新结果
      */
     @PreAuthorize("hasAuthority('SCOPE_users.status.update')")
-    @PatchMapping("users/{id}/status")
+    @PatchMapping("/users/{id}/status")
     public R updateUserStatus(@PathVariable String id, @RequestParam Integer status) {
         log.info("status：{}", status);
         Users.Status statusEnum = Users.Status.values()[status];
         log.info("更新状态为：{}", statusEnum);
         usersService.updateUserStatus(id, statusEnum);
         return R.ok();
+    }
+
+    @PreAuthorize("hasAuthority('SCOPE_users.delete')")
+    @DeleteMapping("/users/{id}")
+    public R deleteUser(@PathVariable String id) {
+        return usersService.removeById(id) ? R.ok() : R.error("删除用户失败");
     }
 }

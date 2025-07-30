@@ -11,9 +11,10 @@ import org.springframework.web.bind.annotation.RequestBody;
  * 商家 OpenFeign 客户端
  * @author zheng
  */
+//TODO 兜底回调
 @FeignClient(value = "product-artisan-service")
 public interface ArtisanFeignClient {
 
-    @PostMapping("/api/v1/artisan")
+    @PostMapping("/api/v1/internal/artisan")
     Artisan addArtisan(@RequestBody @Valid ArtisanDTO artisanDTO);
 }
