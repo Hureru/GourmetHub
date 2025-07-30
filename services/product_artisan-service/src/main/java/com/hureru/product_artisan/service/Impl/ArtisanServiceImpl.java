@@ -1,5 +1,6 @@
 package com.hureru.product_artisan.service.Impl;
 
+import com.hureru.common.exception.BusinessException;
 import com.hureru.product_artisan.bean.Artisan;
 import com.hureru.product_artisan.dto.ArtisanDTO;
 import com.hureru.product_artisan.feign.UserFeignClient;
@@ -27,13 +28,10 @@ public class ArtisanServiceImpl implements IArtisanService {
 
     @Override
     public Artisan saveArtisan(ArtisanDTO dto) {
-        Artisan artisan = new Artisan();
-        artisan.setId(dto.getId());
-        artisan.setName(dto.getName());
-        artisan.setBrandStory(dto.getBrandStory());
-        artisan.setLocation(dto.getLocation());
-        artisan.setLogoUrl(dto.getLogoUrl());
-        artisan.setCertifications(dto.getCertifications());
+        Artisan artisan = new Artisan(dto.getId(),
+                dto.getName(),dto.getBrandStory(),
+                dto.getLocation(), dto.getLogoUrl(),
+                dto.getCertifications());
         artisan.setCreatedAt(java.time.LocalDateTime.now().toString());
         artisan.setUpdatedAt(java.time.LocalDateTime.now().toString());
         return artisanRepository.save(artisan);
@@ -61,7 +59,18 @@ public class ArtisanServiceImpl implements IArtisanService {
     }
 
     @Override
+    public void updateArtisan(Long operateId, String id, ArtisanDTO dto) {
+        if (!operateId.equals(Long.parseLong(id))){
+            throw new BusinessException(403, "无权限操作此数据");
+        }
+        artisanRepository.save(new Artisan(id, dto.getName(), dto.getBrandStory(), dto.getLocation(), dto.getLogoUrl(), dto.getCertifications()));
+    }
+
+    //TODO 使用MQ 异步删除用户
+    @Override
     public void deleteArtisan(String id) {
+        // 删除用户
+        userFeignClient.deleteUser(id);
         artisanRepository.deleteById(id);
     }
 

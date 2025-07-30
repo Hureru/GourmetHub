@@ -16,5 +16,6 @@ public interface IArtisanService {
     List<Artisan> getAllArtisans();
     List<Artisan> getPendingArtisans();
     List<Artisan> getArtisansByName(String name);
+    void updateArtisan(Long operateId, String id, ArtisanDTO dto);
     void deleteArtisan(String id);
 }

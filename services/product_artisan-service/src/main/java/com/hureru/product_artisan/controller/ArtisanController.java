@@ -1,5 +1,8 @@
 package com.hureru.product_artisan.controller;
 
+import com.hureru.common.R;
+import com.hureru.common.utils.JwtUtil;
+import com.hureru.iam.dto.group.ChildCreate;
 import com.hureru.iam.dto.group.Update;
 import com.hureru.product_artisan.bean.Artisan;
 import com.hureru.product_artisan.dto.ArtisanDTO;
@@ -7,6 +10,8 @@ import com.hureru.product_artisan.service.IArtisanService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,18 +39,47 @@ public class ArtisanController {
      * @return 商家信息
      */
     //TODO 权限配置: 使用 Getaway 网关配置允许访问服务
-    @PostMapping("/artisan")
-    public Artisan addArtisan(@RequestBody @Validated(Update.class) ArtisanDTO artisanDTO) {
-        log.info("调用[addArtisan]:{}", artisanDTO);
+    @PostMapping("/internal/artisan")
+    public Artisan addArtisan(@RequestBody @Validated(ChildCreate.class) ArtisanDTO artisanDTO) {
+        log.debug("OpenFeign调用[addArtisan]:{}", artisanDTO);
         return artisanService.saveArtisan(artisanDTO);
     }
 
     /**
      * 获取所有待审核的商家
      */
-    @PreAuthorize("hasAuthority('SCOPE_artisans.get')")
+    @PreAuthorize("hasAuthority('SCOPE_artisans.pendings')")
     @GetMapping("/artisan/pending")
     public List<Artisan> getPendingArtisans() {
+        log.debug("[controller] getPendingArtisans.....");
         return artisanService.getPendingArtisans();
     }
+
+    /**
+     * 更新商家
+     * @param artisanDTO 商家信息
+     *                   仅限商家自己修改
+     * @return {@code 200 OK}
+     */
+    @PreAuthorize("hasAuthority('SCOPE_artisans.update')")
+    @PutMapping("/artisan/{id}")
+    public R updateArtisan(@AuthenticationPrincipal Jwt jwt,  @PathVariable String id, @RequestBody @Validated(Update.class) ArtisanDTO artisanDTO) {
+        Long userId = JwtUtil.getUserIdFromJwt(jwt);
+        log.debug("[controller] updateArtisan:{}", artisanDTO);
+        artisanService.updateArtisan(userId, id, artisanDTO);
+        return R.ok();
+    }
+
+    /**
+     * 删除商家
+     * @param id 商家id
+     * @return {@code 200 OK}
+     */
+    @PreAuthorize("hasAuthority('SCOPE_artisans.delete')")
+    @DeleteMapping("/artisan/{id}")
+    public R deleteArtisan(@PathVariable String id) {
+        artisanService.deleteArtisan(id);
+        return R.ok();
+    }
+
 }
