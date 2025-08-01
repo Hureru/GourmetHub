@@ -16,33 +16,42 @@ public class Recipe {
     @Id
     private String id;
     private String title;
-    private Author author;
     private String description;
     private String mainImageUrl;
+
+    private String authorId;
+    private AuthorInfo authorInfo;
+
     private int prepTimeMinutes;
     private int cookTimeMinutes;
     private int servings;
     private String difficulty;
+
     private List<Ingredient> ingredients;
     private List<Step> steps;
     private List<String> tags;
-    private Ratings ratings;
-    private List<Comment> latestComments;
+
+    private Double ratingAverage;
+    private int ratingCount;
+    // 新增评论数字段
+    private int commentCount;
+
     private boolean isPublished;
     private Date publishedAt;
     private Date createdAt;
     private Date updatedAt;
 
     @Data
-    public static class Author {
-        private String userId;
+    public static class AuthorInfo {
         private String nickname;
+        private String avatarUrl;
     }
 
     @Data
     public static class Ingredient {
         private String name;
-        private String quantity;
+        private double amount; // 更改为数值类型
+        private String unit;   // 新增单位字段
         private String notes;
         private String productId; // 可选，关联到平台上的具体产品
     }
@@ -51,16 +60,7 @@ public class Recipe {
     public static class Step {
         private int stepNumber;
         private String instruction;
+        private String imageUrl; // 新增图片URL字段
     }
 
-    @Data
-    public static class Ratings {
-        private double average;
-        private int count;
-    }
-
-    @Data
-    public static class Comment {
-        // 根据实际需求添加评论相关字段
-    }
 }
