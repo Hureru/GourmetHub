@@ -88,6 +88,10 @@ public class UsersController {
         return usersService.getPendingUserIds();
     }
 
+    @GetMapping("/internal/isEffectiveArtisan")
+    public Boolean isEffectiveArtisan(@RequestParam String id) {
+        return usersService.checkArtisanEffective(id);
+    }
     /**
      * 激活/禁用 (待审核商家)
      *

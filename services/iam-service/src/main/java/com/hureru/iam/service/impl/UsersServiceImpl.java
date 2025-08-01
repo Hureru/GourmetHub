@@ -135,6 +135,15 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
     }
 
     @Override
+    public boolean checkArtisanEffective(String userId) {
+        QueryWrapper<Users> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("id", userId);
+        queryWrapper.eq("is_artisan", true);
+        queryWrapper.eq("status", Users.Status.ACTIVE);
+        return count(queryWrapper) > 0;
+    }
+
+    @Override
     public void activateArtisan(String userId, Boolean active) {
         UpdateWrapper<Users> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("id", userId);

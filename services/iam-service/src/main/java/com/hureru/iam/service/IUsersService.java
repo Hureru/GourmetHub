@@ -16,10 +16,11 @@ import java.util.List;
  */
 public interface IUsersService extends IService<Users> {
     Users userRegister(String email, String password, String nickname);
-
     Users artisanRegister(ArtisanDTO artisanDTO);
     // 获取待审核的用户ID列表
     List<String> getPendingUserIds();
+    // 检验商家状态
+    boolean checkArtisanEffective(String userId);
     // 激活/禁用商家
     void activateArtisan(String userId, Boolean active);
     // 更新用户状态
