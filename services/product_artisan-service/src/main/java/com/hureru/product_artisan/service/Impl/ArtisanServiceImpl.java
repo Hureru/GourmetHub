@@ -7,14 +7,15 @@ import com.hureru.product_artisan.feign.UserFeignClient;
 import com.hureru.product_artisan.repository.ArtisanRepository;
 import com.hureru.product_artisan.service.IArtisanService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * @author zheng
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ArtisanServiceImpl implements IArtisanService {
@@ -38,8 +39,15 @@ public class ArtisanServiceImpl implements IArtisanService {
     }
 
     @Override
-    public Optional<Artisan> getArtisanById(String id) {
-        return artisanRepository.findById(id);
+    public Artisan getArtisanById(String id) {
+        // 判断id是否是审核通过的商家
+        if (!userFeignClient.isEffectiveArtisan(id)){
+            artisanRepository.findById(id).orElseThrow(() -> {
+                log.error("[严重错误] 存在商家账号，但查询不到商家信息");
+                return new BusinessException(404, "找不到ID为 " + id + " 的商家信息");
+            });
+        }
+        throw new BusinessException(404, "商家不存在");
     }
 
     @Override

@@ -45,14 +45,23 @@ public class ArtisanController {
         return artisanService.saveArtisan(artisanDTO);
     }
 
+    @PreAuthorize("hasAuthority('SCOPE_artisans.get')")
+    @GetMapping("/artisan/{id}")
+    public Artisan getArtisanById(@PathVariable String id) {
+        log.debug("[controller] getArtisanById:{}", id);
+        return artisanService.getArtisanById(id);
+    }
+
+
     /**
      * 获取所有待审核的商家
      */
     @PreAuthorize("hasAuthority('SCOPE_artisans.pendings')")
     @GetMapping("/artisan/pending")
-    public List<Artisan> getPendingArtisans() {
+    public R getPendingArtisans() {
         log.debug("[controller] getPendingArtisans.....");
-        return artisanService.getPendingArtisans();
+        List<Artisan> artisans = artisanService.getPendingArtisans();
+        return R.ok("success", artisans);
     }
 
     /**

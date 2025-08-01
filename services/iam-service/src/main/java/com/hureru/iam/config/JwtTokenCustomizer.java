@@ -37,7 +37,7 @@ public class JwtTokenCustomizer implements OAuth2TokenCustomizer<JwtEncodingCont
                     "artisans.delete"));
             put("ROLE_MODERATOR", List.of("artisan.active", "artisans.pendings"));
             put("ROLE_ARTISAN", List.of("artisans.update"));
-            put("ROLE_USER", List.of("address", "userprofile"));
+            put("ROLE_USER", List.of("address", "userprofile", "artisans.get"));
         }
     };
 
