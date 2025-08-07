@@ -1,6 +1,7 @@
 package com.hureru.product_artisan.service;
 
 import com.hureru.product_artisan.bean.Product;
+import com.hureru.product_artisan.dto.ProductDTO;
 import com.hureru.product_artisan.dto.ProductQueryDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,7 +13,7 @@ import java.util.Optional;
  * @author zheng
  */
 public interface IProductService {
-    Product saveProduct(Product product);
+    Product saveProduct(Long userId, ProductDTO productDTO);
     Optional<Product> getProductById(String id);
     List<Product> getAllProducts();
     List<Product> getPublishedProducts();

@@ -78,6 +78,7 @@ public class ArtisanController {
     @PreAuthorize("hasAuthority('SCOPE_artisans.update')")
     @PutMapping("/artisan/{id}")
     public Response updateArtisan(@AuthenticationPrincipal Jwt jwt, @PathVariable String id, @RequestBody @Validated(Update.class) ArtisanDTO artisanDTO) {
+        //TODO 更新 name/logoUrl 需要更新 所属 Product 的 ArtisanInfo
         Long userId = JwtUtil.getUserIdFromJwt(jwt);
         log.debug("[controller] updateArtisan:{}", artisanDTO);
         artisanService.updateArtisan(userId, id, artisanDTO);

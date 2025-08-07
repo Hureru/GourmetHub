@@ -2,20 +2,22 @@ package com.hureru.product_artisan.controller;
 
 import com.hureru.common.PaginationData;
 import com.hureru.common.R;
+import com.hureru.common.utils.JwtUtil;
 import com.hureru.product_artisan.bean.Product;
+import com.hureru.product_artisan.dto.ProductDTO;
 import com.hureru.product_artisan.dto.ProductQueryDTO;
 import com.hureru.product_artisan.service.IProductService;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 /**
  * @author zheng
@@ -28,25 +30,13 @@ public class ProductController {
     private final IProductService productService;
 
     /**
-     * 获取已发布产品
-     *
-     * @return 所有已发布的产品
-     */
-    @GetMapping("/public/products")
-    public R<List<Product>> getPublishedProducts() {
-        log.debug("[controller] getPublishedProducts.....");
-        List<Product> products = productService.getPublishedProducts();
-        return R.ok("success", products);
-    }
-
-    /**
      * 根据动态条件分页搜索产品
      * @param queryDTO 查询条件，通过请求体传入
      * @param page 当前页码 从 1 开始
      * @param size 每页数量 最小为 5
      * @return 分页后的产品数据
      */
-    @PostMapping("/public/products") // 使用 POST 更适合复杂查询
+    @PostMapping("/public/products")
     public R<PaginationData<Product>> searchProducts(
             @RequestBody ProductQueryDTO queryDTO, // 从请求体获取查询条件
             @Min(1) @RequestParam(defaultValue = "1") int page,
@@ -69,6 +59,22 @@ public class ProductController {
 
         log.debug("[controller] searchProducts.....");
         return R.ok("ok", paginationData);
+    }
+
+    /**
+     * 添加产品 需要 商家 权限
+     * @param jwt 用户令牌
+     * @param productDTO 产品数据
+     *
+     * @return {@code 200 OK}新增的产品数据
+     */
+    @PreAuthorize("hasAuthority('SCOPE_products.add')")
+    @PostMapping("/products")
+    public R<Product> addProduct(@AuthenticationPrincipal Jwt jwt, @RequestBody ProductDTO productDTO) {
+        log.debug("[controller] addProduct.....");
+        Long userId = JwtUtil.getUserIdFromJwt(jwt);
+        Product product = productService.saveProduct(userId, productDTO);
+        return R.ok("ok", product);
     }
 
 
