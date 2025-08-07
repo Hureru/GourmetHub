@@ -2,6 +2,7 @@ package com.hureru.iam.controller;
 
 
 import com.hureru.common.R;
+import com.hureru.common.Response;
 import com.hureru.iam.bean.Users;
 import com.hureru.iam.dto.UserDTO;
 import com.hureru.iam.service.IUsersService;
@@ -47,7 +48,7 @@ public class UsersController {
      * {@code 409 Conflict} 邮箱已存在
      */
     @PostMapping("/register/users")
-    public R register(@Valid @RequestBody UserDTO userDTO) {
+    public R<Users> register(@Valid @RequestBody UserDTO userDTO) {
         // 用户注册
         Users user = usersService.userRegister(userDTO.getEmail(), userDTO.getPassword(), userDTO.getNickname());
         log.info("用户注册：{}", user);
@@ -70,7 +71,7 @@ public class UsersController {
      * {@code 409 Conflict} 邮箱已存在
      */
     @PostMapping("/register/artisan")
-    public R registerArtisan(@Validated(Create.class) @RequestBody ArtisanDTO artisanDTO) {
+    public R<Users> registerArtisan(@Validated(Create.class) @RequestBody ArtisanDTO artisanDTO) {
         log.info("[controller] 商家注册：{}", artisanDTO);
         // 商家注册
         Users user = usersService.artisanRegister(artisanDTO);
@@ -78,7 +79,7 @@ public class UsersController {
     }
 
     /**
-     * 受保护接口，仅限product_artisan-service 服务调用，获取待审核用户列表
+     * 内部接口，仅限product_artisan-service 服务调用，获取待审核用户列表
      *
      * @return 待审核用户ID列表
      */
@@ -88,10 +89,16 @@ public class UsersController {
         return usersService.getPendingUserIds();
     }
 
+    /**
+     * 内部接口 获取待审核商家列表
+     *
+     * @return 待审核商家ID列表
+     */
     @GetMapping("/internal/isEffectiveArtisan")
     public Boolean isEffectiveArtisan(@RequestParam String id) {
         return usersService.checkArtisanEffective(id);
     }
+
     /**
      * 激活/禁用 (待审核商家)
      *
@@ -100,9 +107,9 @@ public class UsersController {
      */
     @PreAuthorize("hasAuthority('SCOPE_artisan.active')")
     @PatchMapping("/artisan/{id}/active")
-    public R activeUser(@PathVariable String id, @RequestParam Boolean active) {
+    public Response activeUser(@PathVariable String id, @RequestParam Boolean active) {
         usersService.activateArtisan(id, active);
-        return R.ok();
+        return Response.ok();
     }
 
     /**
@@ -113,17 +120,23 @@ public class UsersController {
      */
     @PreAuthorize("hasAuthority('SCOPE_users.status.update')")
     @PatchMapping("/users/{id}/status")
-    public R updateUserStatus(@PathVariable String id, @RequestParam Integer status) {
+    public Response updateUserStatus(@PathVariable String id, @RequestParam Integer status) {
         log.info("status：{}", status);
         Users.Status statusEnum = Users.Status.values()[status];
         log.info("更新状态为：{}", statusEnum);
         usersService.updateUserStatus(id, statusEnum);
-        return R.ok();
+        return Response.ok();
     }
 
+    /**
+     * 删除用户
+     *
+     * @param id 用户ID
+     * @return 删除结果
+     */
     @PreAuthorize("hasAuthority('SCOPE_users.delete')")
     @DeleteMapping("/users/{id}")
-    public R deleteUser(@PathVariable String id) {
-        return usersService.removeById(id) ? R.ok() : R.error("删除用户失败");
+    public Response deleteUser(@PathVariable String id) {
+        return usersService.removeById(id) ? Response.ok() : Response.error("删除用户失败");
     }
 }

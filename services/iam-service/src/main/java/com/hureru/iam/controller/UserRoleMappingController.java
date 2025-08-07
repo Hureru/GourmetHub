@@ -2,6 +2,7 @@ package com.hureru.iam.controller;
 
 
 import com.hureru.common.R;
+import com.hureru.common.Response;
 import com.hureru.common.utils.JwtUtil;
 import com.hureru.iam.RoleEnum;
 import com.hureru.iam.service.IUserRoleMappingService;
@@ -30,11 +31,11 @@ public class UserRoleMappingController {
      * @param jwt 用户令牌
      */
     @PatchMapping("/users/{id}/admin")
-    public R updateUserRoleAdmin(@AuthenticationPrincipal Jwt jwt, @PathVariable Long id) {
+    public Response updateUserRoleAdmin(@AuthenticationPrincipal Jwt jwt, @PathVariable Long id) {
         // 从JWT中获取用户ID
         Long userId = JwtUtil.getUserIdFromJwt(jwt);
         userRoleMappingService.updateUserRole(userId, id, RoleEnum.ROLE_ADMIN);
-        return R.ok();
+        return Response.ok();
     }
 
     /**
@@ -42,10 +43,10 @@ public class UserRoleMappingController {
      * @param jwt 用户令牌
      */
     @PatchMapping("/users/{id}/moderator")
-    public R updateUserRoleModerator(@AuthenticationPrincipal Jwt jwt, @PathVariable Long id) {
+    public Response updateUserRoleModerator(@AuthenticationPrincipal Jwt jwt, @PathVariable Long id) {
         // 从JWT中获取用户ID
         Long userId = JwtUtil.getUserIdFromJwt(jwt);
         userRoleMappingService.updateUserRole(userId, id, RoleEnum.ROLE_MODERATOR);
-        return R.ok();
+        return Response.ok();
     }
 }

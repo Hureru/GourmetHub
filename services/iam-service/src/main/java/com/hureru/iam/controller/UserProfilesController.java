@@ -2,6 +2,7 @@ package com.hureru.iam.controller;
 
 
 import com.hureru.common.R;
+import com.hureru.common.Response;
 import com.hureru.common.utils.JwtUtil;
 import com.hureru.iam.bean.UserProfiles;
 import com.hureru.iam.dto.UserProfileDTO;
@@ -35,7 +36,7 @@ public class UserProfilesController {
      * {@code 401 Unauthorized} 令牌无效或缺失
      */
     @GetMapping("/users/me")
-    public R me(@AuthenticationPrincipal Jwt jwt) {
+    public R<UserProfiles> me(@AuthenticationPrincipal Jwt jwt) {
         // 从JWT中获取用户ID
         Long userId = JwtUtil.getUserIdFromJwt(jwt);
         // 实现获取个人资料逻辑
@@ -47,16 +48,16 @@ public class UserProfilesController {
      * 受保护接口, 更新当前认证用户的个人资料
      * @param jwt 用户令牌
      * @param userProfile 需要更新的资料
-     * @return {@code 200 OK} 返回 success
+     * @return {@code 200 OK} 返回 ok
      * {@code 401 Unauthorized} 令牌无效或缺失
      */
     @PatchMapping("/users/me")
-    public R updateMe(@AuthenticationPrincipal Jwt jwt, @Valid @RequestBody UserProfileDTO userProfile) {
+    public Response updateMe(@AuthenticationPrincipal Jwt jwt, @Valid @RequestBody UserProfileDTO userProfile) {
         // 从JWT中获取用户ID
         Long userId = JwtUtil.getUserIdFromJwt(jwt);
         // 更新个人资料
         userProfilesService.updateUserByFields(userId, userProfile);
-        return R.ok(200);
+        return Response.ok(200);
     }
 
 }

@@ -2,6 +2,7 @@ package com.hureru.iam.controller;
 
 
 import com.hureru.common.R;
+import com.hureru.common.Response;
 import com.hureru.common.utils.JwtUtil;
 import com.hureru.iam.bean.Addresses;
 import com.hureru.iam.dto.AddressDTO;
@@ -38,7 +39,7 @@ public class AddressesController {
      * @return {@code 200 OK}所有配送地址
      */
     @GetMapping("/users/me/addresses")
-    public R getAddresses(@AuthenticationPrincipal Jwt jwt){
+    public R<List<Addresses>> getAddresses(@AuthenticationPrincipal Jwt jwt){
         // 从JWT中获取用户ID
         Long userId = JwtUtil.getUserIdFromJwt(jwt);
         // 获取当前用户所有配送地址
@@ -53,7 +54,7 @@ public class AddressesController {
      * @return {@code 201 Created} 成功返回新增的配送地址
      */
     @PostMapping("/users/me/addresses")
-    public R createAddress(@AuthenticationPrincipal Jwt jwt, @Validated(Create.class) @RequestBody AddressDTO address){
+    public R<Addresses> createAddress(@AuthenticationPrincipal Jwt jwt, @Validated(Create.class) @RequestBody AddressDTO address){
         // 从JWT中获取用户ID
         Long userId = JwtUtil.getUserIdFromJwt(jwt);
         // 创建配送地址
@@ -65,15 +66,15 @@ public class AddressesController {
      * 受保护接口, 更新配送地址
      * @param jwt 用户令牌
      * @param address 配送地址更新信息
-     * @return {@code 200 OK} 成功返回 success
+     * @return {@code 200 OK} 成功返回 ok
      */
     @PatchMapping("/users/me/addresses/{id}")
-    public R updateAddress(@AuthenticationPrincipal Jwt jwt, @PathVariable("id") Long addrId, @Validated(Update.class) @RequestBody AddressDTO address){
+    public Response updateAddress(@AuthenticationPrincipal Jwt jwt, @PathVariable("id") Long addrId, @Validated(Update.class) @RequestBody AddressDTO address){
         // 从JWT中获取用户ID
         Long userId = JwtUtil.getUserIdFromJwt(jwt);
         // 更新配送地址
         addressesService.updateAddress(addrId, userId, address);
-        return R.ok(200);
+        return Response.ok();
     }
 
     /**
@@ -83,11 +84,11 @@ public class AddressesController {
      * @return {@code 200 OK}
      */
     @PatchMapping("/users/me/addresses/{id}/default")
-    public R updateDefaultAddr(@AuthenticationPrincipal Jwt jwt, @PathVariable("id")Long addrId){
+    public Response updateDefaultAddr(@AuthenticationPrincipal Jwt jwt, @PathVariable("id")Long addrId){
         // 从JWT中获取用户ID
         Long userId = JwtUtil.getUserIdFromJwt(jwt);
         addressesService.updateDefaultAddr(addrId, userId);
-        return R.ok(200);
+        return Response.ok(200);
     }
 
     /**
@@ -96,12 +97,12 @@ public class AddressesController {
      * @return {@code 200 OK}
      */
     @DeleteMapping("/users/me/addresses/{id}")
-    public R deleteAddress(@AuthenticationPrincipal Jwt jwt, @PathVariable("id") Long addrId) {
+    public Response deleteAddress(@AuthenticationPrincipal Jwt jwt, @PathVariable("id") Long addrId) {
         // 从JWT中获取用户ID
         Long userId = JwtUtil.getUserIdFromJwt(jwt);
         // 删除配送地址
         addressesService.deleteAddress(addrId, userId);
-        return R.ok(200);
+        return Response.ok(200);
     }
 
 

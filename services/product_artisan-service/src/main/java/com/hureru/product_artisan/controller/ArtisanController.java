@@ -1,6 +1,7 @@
 package com.hureru.product_artisan.controller;
 
 import com.hureru.common.R;
+import com.hureru.common.Response;
 import com.hureru.common.utils.JwtUtil;
 import com.hureru.iam.dto.group.ChildCreate;
 import com.hureru.iam.dto.group.Update;
@@ -18,10 +19,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * <p>
- * 存储商家信息的表 前端控制器
- * </p>
- *
  * @author zheng
  * @since 2025-07-29
  */
@@ -66,7 +63,7 @@ public class ArtisanController {
      */
     @PreAuthorize("hasAuthority('SCOPE_artisans.pendings')")
     @GetMapping("/artisan/pending")
-    public R getPendingArtisans() {
+    public R<List<Artisan>> getPendingArtisans() {
         log.debug("[controller] getPendingArtisans.....");
         List<Artisan> artisans = artisanService.getPendingArtisans();
         return R.ok("success", artisans);
@@ -80,11 +77,11 @@ public class ArtisanController {
      */
     @PreAuthorize("hasAuthority('SCOPE_artisans.update')")
     @PutMapping("/artisan/{id}")
-    public R updateArtisan(@AuthenticationPrincipal Jwt jwt,  @PathVariable String id, @RequestBody @Validated(Update.class) ArtisanDTO artisanDTO) {
+    public Response updateArtisan(@AuthenticationPrincipal Jwt jwt, @PathVariable String id, @RequestBody @Validated(Update.class) ArtisanDTO artisanDTO) {
         Long userId = JwtUtil.getUserIdFromJwt(jwt);
         log.debug("[controller] updateArtisan:{}", artisanDTO);
         artisanService.updateArtisan(userId, id, artisanDTO);
-        return R.ok();
+        return Response.ok();
     }
 
     /**
@@ -94,9 +91,9 @@ public class ArtisanController {
      */
     @PreAuthorize("hasAuthority('SCOPE_artisans.delete')")
     @DeleteMapping("/artisan/{id}")
-    public R deleteArtisan(@PathVariable String id) {
+    public Response deleteArtisan(@PathVariable String id) {
         artisanService.deleteArtisan(id);
-        return R.ok();
+        return Response.ok();
     }
 
 }

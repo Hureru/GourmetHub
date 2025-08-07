@@ -22,14 +22,14 @@ public class ProductController {
     private final IProductService productService;
 
     /**
-     * 获取所有产品
+     * 获取已发布产品
      *
-     * @return 所有产品
+     * @return 所有已发布的产品
      */
     @GetMapping("/public/products")
-    public R getProducts() {
-        log.debug("[controller] getProducts.....");
-        List<Product> products = productService.getAllProducts();
+    public R<List<Product>> getPublishedProducts() {
+        log.debug("[controller] getPublishedProducts.....");
+        List<Product> products = productService.getPublishedProducts();
         return R.ok("success", products);
     }
 
