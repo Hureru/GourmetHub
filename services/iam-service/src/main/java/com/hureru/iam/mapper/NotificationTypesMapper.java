@@ -2,6 +2,7 @@ package com.hureru.iam.mapper;
 
 import com.hureru.iam.bean.NotificationTypes;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Mapper;
 
 /**
  * <p>
@@ -11,6 +12,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * @author zheng
  * @since 2025-08-07
  */
+@Mapper
 public interface NotificationTypesMapper extends BaseMapper<NotificationTypes> {
 
 }
