@@ -2,6 +2,7 @@ package com.hureru.iam.exception;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hureru.common.R;
+import com.hureru.common.Response;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +29,7 @@ public class RestAccessDeniedHandler implements AccessDeniedHandler {
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
         response.setContentType("application/json;charset=UTF-8");
         // 使用 R 对象封装错误信息
-        R errorResponse = R.error(403, "无权访问此资源: " + accessDeniedException.getMessage());
+        Response errorResponse = Response.error(403, "无权访问此资源: " + accessDeniedException.getMessage());
         // 将 R 对象序列化为 JSON 字符串并写入响应
         response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
     }
