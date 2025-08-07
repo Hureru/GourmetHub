@@ -2,7 +2,7 @@ package com.hureru.iam.service.impl;
 
 import com.hureru.iam.bean.NotificationTypes;
 import com.hureru.iam.mapper.NotificationTypesMapper;
-import java.com.hureru.iam.service.INotificationTypesService;
+import com.hureru.iam.service.INotificationTypesService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 

@@ -2,7 +2,7 @@ package com.hureru.iam.service.impl;
 
 import com.hureru.iam.bean.UserNotificationPreferences;
 import com.hureru.iam.mapper.UserNotificationPreferencesMapper;
-import java.com.hureru.iam.service.IUserNotificationPreferencesService;
+import com.hureru.iam.service.IUserNotificationPreferencesService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 
