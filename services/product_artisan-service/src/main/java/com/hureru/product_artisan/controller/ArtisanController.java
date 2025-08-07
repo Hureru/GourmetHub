@@ -34,7 +34,7 @@ public class ArtisanController {
     private final IArtisanService artisanService;
 
     /**
-     * 仅限 OpenFeign_ iam-service 调用，添加商家信息
+     * 内部接口 仅限 OpenFeign_ iam-service 调用，添加商家信息
      * @param artisanDTO 商家信息
      * @return 商家信息
      */
@@ -45,16 +45,24 @@ public class ArtisanController {
         return artisanService.saveArtisan(artisanDTO);
     }
 
+    /**
+     * 获取 已发布商家 或 商家本人 信息，需要 用户/商家 权限
+     *
+     * @param jwt jwt
+     * @param id 商家id
+     * @return 商家信息
+     */
     @PreAuthorize("hasAuthority('SCOPE_artisans.get')")
     @GetMapping("/artisan/{id}")
-    public Artisan getArtisanById(@PathVariable String id) {
+    public Artisan getArtisanById(@AuthenticationPrincipal Jwt jwt, @PathVariable String id) {
+        Long userId = JwtUtil.getUserIdFromJwt(jwt);
         log.debug("[controller] getArtisanById:{}", id);
-        return artisanService.getArtisanById(id);
+        return artisanService.getArtisanById(id, userId);
     }
 
 
     /**
-     * 获取所有待审核的商家
+     * 获取所有待审核的商家 需要 管理员/审核员 权限
      */
     @PreAuthorize("hasAuthority('SCOPE_artisans.pendings')")
     @GetMapping("/artisan/pending")
@@ -67,7 +75,7 @@ public class ArtisanController {
     /**
      * 更新商家
      * @param artisanDTO 商家信息
-     *                   仅限商家自己修改
+     *                   仅限商家自己修改，需要 商家 权限
      * @return {@code 200 OK}
      */
     @PreAuthorize("hasAuthority('SCOPE_artisans.update')")
@@ -80,7 +88,7 @@ public class ArtisanController {
     }
 
     /**
-     * 删除商家
+     * 删除商家 需要 管理员 权限
      * @param id 商家id
      * @return {@code 200 OK}
      */

@@ -39,9 +39,9 @@ public class ArtisanServiceImpl implements IArtisanService {
     }
 
     @Override
-    public Artisan getArtisanById(String id) {
-        // 判断id是否是审核通过的商家
-        if (!userFeignClient.isEffectiveArtisan(id)){
+    public Artisan getArtisanById(String id, Long operateId) {
+        // 判断 是不是商家本人 或者 是否是审核通过的商家
+        if (id.equals(operateId.toString()) || !userFeignClient.isEffectiveArtisan(id)){
             artisanRepository.findById(id).orElseThrow(() -> {
                 log.error("[严重错误] 存在商家账号，但查询不到商家信息");
                 return new BusinessException(404, "找不到ID为 " + id + " 的商家信息");

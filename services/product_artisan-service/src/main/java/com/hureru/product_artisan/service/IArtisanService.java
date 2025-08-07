@@ -12,7 +12,7 @@ import java.util.Optional;
 public interface IArtisanService {
     Artisan saveArtisan(Artisan artisan);
     Artisan saveArtisan(ArtisanDTO dto);
-    Artisan getArtisanById(String id);
+    Artisan getArtisanById(String id, Long operateId);
     List<Artisan> getAllArtisans();
     List<Artisan> getPendingArtisans();
     List<Artisan> getArtisansByName(String name);
