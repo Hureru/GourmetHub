@@ -2,8 +2,10 @@ package com.hureru.product_artisan.controller;
 
 import com.hureru.common.PaginationData;
 import com.hureru.common.R;
+import com.hureru.common.Response;
 import com.hureru.common.utils.JwtUtil;
 import com.hureru.product_artisan.bean.Product;
+import com.hureru.product_artisan.dto.AuditDTO;
 import com.hureru.product_artisan.dto.ProductDTO;
 import com.hureru.product_artisan.dto.ProductQueryDTO;
 import com.hureru.product_artisan.service.IProductService;
@@ -77,5 +79,19 @@ public class ProductController {
         return R.ok("ok", product);
     }
 
-
+    /**
+     * 审核产品 需要 审核/管理员 权限
+     * @param jwt 用户令牌
+     * @param id 产品ID
+     * @param auditDTO 审核信息
+     * @return {@code 200 OK}
+     */
+    @PreAuthorize("hasAuthority('SCOPE_products.approve')")
+    @PostMapping("/products/{id}/approve")
+    public Response approveProduct(@AuthenticationPrincipal Jwt jwt, @PathVariable String id, @RequestBody AuditDTO auditDTO) {
+        log.debug("[controller] approveProduct.....");
+        Long userId = JwtUtil.getUserIdFromJwt(jwt);
+        productService.approveProduct(userId, id, auditDTO);
+        return Response.ok();
+    }
 }

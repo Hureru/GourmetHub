@@ -1,7 +1,9 @@
 package com.hureru.product_artisan.service.Impl;
 
+import com.hureru.common.exception.BusinessException;
 import com.hureru.product_artisan.bean.Artisan;
 import com.hureru.product_artisan.bean.Product;
+import com.hureru.product_artisan.dto.AuditDTO;
 import com.hureru.product_artisan.dto.ProductDTO;
 import com.hureru.product_artisan.dto.ProductQueryDTO;
 import com.hureru.product_artisan.repository.ArtisanRepository;
@@ -73,6 +75,22 @@ public class ProductServiceImpl implements IProductService {
 
         log.debug("[service] (saveProduct) addProduct: {}", product);
         return productRepository.save(product);
+    }
+
+    @Override
+    public void approveProduct(Long userId, String id, AuditDTO auditDTO) {
+        Product product = productRepository.findById(id).orElse(null);
+        if (product == null) {
+            throw new BusinessException(404, "产品不存在");
+        }
+        if (!product.getAudit().getStatus().equals(Product.AuditInfo.Status.PENDING)) {
+            throw new BusinessException(400, "产品审核状态错误");
+        }
+        product.getAudit().setStatus(auditDTO.getStatus());
+        product.getAudit().setReviewTime(LocalDateTime.now());
+        product.getAudit().setReviewer(String.valueOf(userId));
+        product.getAudit().setComment(auditDTO.getComment());
+        productRepository.save(product);
     }
 
     @Override
