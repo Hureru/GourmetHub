@@ -68,7 +68,6 @@ public class ProductServiceImpl implements IProductService {
         product.setCommentCount(0);
 
         product.setAudit(new Product.AuditInfo());
-        product.setIsPublished(false);
         product.setCreatedAt(LocalDateTime.now());
         product.setUpdatedAt(LocalDateTime.now());
         product.setVersion(1L);
@@ -76,6 +75,33 @@ public class ProductServiceImpl implements IProductService {
         log.debug("[service] (saveProduct) addProduct: {}", product);
         return productRepository.save(product);
     }
+
+    @Override
+    public Product updateProduct(Long userId, String id, ProductDTO productDTO) {
+        Product product = productRepository.findById(id).orElseThrow(()-> new BusinessException(404, "产品不存在"));
+        if (!product.getArtisanId().equals(userId.toString())){
+            throw new BusinessException(403, "无权限修改产品");
+        }
+
+        product.setName(productDTO.getName());
+        product.setDescription(productDTO.getDescription());
+        product.setImages(productDTO.getImages());
+        product.setCategoryId(productDTO.getCategoryId());
+
+        product.setPrice(productDTO.getPrice());
+        product.setStockQuantity(productDTO.getStockQuantity());
+
+        product.setTags(productDTO.getTags());
+        product.setAttributes(productDTO.getAttributes());
+
+        product.setIsPublished(productDTO.getIsPublished());
+
+        product.setUpdatedAt(LocalDateTime.now());
+
+        log.debug("[service] (updateProduct) updateProduct: {}", product);
+        return productRepository.save(product);
+    }
+
 
     @Override
     public void approveProduct(Long userId, String id, AuditDTO auditDTO) {
@@ -94,8 +120,13 @@ public class ProductServiceImpl implements IProductService {
     }
 
     @Override
-    public Optional<Product> getProductById(String id) {
-        return productRepository.findById(id);
+    public Product getProductById(String id) {
+        log.debug("[service] (getProductById) id: {}", id);
+         Product product = productRepository.findById(id).orElseThrow(() -> new BusinessException(404, "产品不存在"));
+         if (!product.getIsPublished() || !product.getAudit().getStatus().equals(Product.AuditInfo.Status.APPROVED)) {
+             throw new BusinessException(403, "产品未发布");
+         }
+        return product;
     }
 
     @Override
@@ -153,7 +184,16 @@ public class ProductServiceImpl implements IProductService {
     }
 
     @Override
-    public void deleteProduct(String id) {
+    public void deleteProduct(Long userId, String id) {
+        Product product = productRepository.findById(id).orElseThrow(() -> new BusinessException(404, "产品不存在"));
+        if (!product.getArtisanId().equals(userId.toString())) {
+            throw new BusinessException(403, "无删除权限");
+        }
         productRepository.deleteById(id);
+    }
+
+    @Override
+    public List<Product> getProductsByArtisanId(Long userId) {
+        return productRepository.findByArtisanId(userId.toString());
     }
 }

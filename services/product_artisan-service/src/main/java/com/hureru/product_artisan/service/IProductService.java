@@ -1,7 +1,6 @@
 package com.hureru.product_artisan.service;
 
 import com.hureru.product_artisan.bean.Product;
-import com.hureru.product_artisan.bean.Product.AuditInfo.Status;
 import com.hureru.product_artisan.dto.AuditDTO;
 import com.hureru.product_artisan.dto.ProductDTO;
 import com.hureru.product_artisan.dto.ProductQueryDTO;
@@ -9,7 +8,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * @author zheng
@@ -22,8 +20,16 @@ public interface IProductService {
      * @return 保存后的产品信息
      */
     Product saveProduct(Long userId, ProductDTO productDTO);
+    /**
+     * 更新产品信息
+     * @param userId 用户ID
+     * @param id 产品ID
+     * @param productDTO 产品信息 DTO
+     * @return 更新后的产品信息
+     */
+    Product updateProduct(Long userId, String id, ProductDTO productDTO);
     void approveProduct(Long userId, String id, AuditDTO auditDTO);
-    Optional<Product> getProductById(String id);
+    Product getProductById(String id);
     List<Product> getAllProducts();
     List<Product> getPublishedProducts();
     /**
@@ -34,5 +40,7 @@ public interface IProductService {
      */
     Page<Product> searchProducts(ProductQueryDTO queryDTO, Pageable pageable, boolean isPublished);
     List<Product> getProductsByName(String name);
-    void deleteProduct(String id);
+    void deleteProduct(Long userId, String id);
+
+    List<Product> getProductsByArtisanId(Long userId);
 }

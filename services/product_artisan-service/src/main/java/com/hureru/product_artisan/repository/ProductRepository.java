@@ -18,4 +18,6 @@ public interface ProductRepository extends MongoRepository<Product, String> {
     List<Product> findByPriceGreaterThan(Product.Price price);
 
     List<Product> findByIsPublished(boolean b);
+
+    List<Product> findByArtisanId(String idString);
 }

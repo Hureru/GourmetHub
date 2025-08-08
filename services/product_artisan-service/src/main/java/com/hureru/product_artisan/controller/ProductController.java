@@ -4,6 +4,8 @@ import com.hureru.common.PaginationData;
 import com.hureru.common.R;
 import com.hureru.common.Response;
 import com.hureru.common.utils.JwtUtil;
+import com.hureru.iam.dto.group.Create;
+import com.hureru.iam.dto.group.Update;
 import com.hureru.product_artisan.bean.Product;
 import com.hureru.product_artisan.dto.AuditDTO;
 import com.hureru.product_artisan.dto.ProductDTO;
@@ -19,7 +21,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * @author zheng
@@ -72,12 +77,44 @@ public class ProductController {
      */
     @PreAuthorize("hasAuthority('SCOPE_products.add')")
     @PostMapping("/products")
-    public R<Product> addProduct(@AuthenticationPrincipal Jwt jwt, @RequestBody ProductDTO productDTO) {
+    public R<Product> addProduct(@AuthenticationPrincipal Jwt jwt, @Validated(Create.class) @RequestBody ProductDTO productDTO) {
         log.debug("[controller] addProduct.....");
         Long userId = JwtUtil.getUserIdFromJwt(jwt);
         Product product = productService.saveProduct(userId, productDTO);
         return R.ok("ok", product);
     }
+
+    /**
+     * 修改产品 需要 商家 权限
+     * @param jwt 用户令牌
+     * @param id 产品ID
+     * @param productDTO 产品数据
+     * @return {@code 200 OK}修改后的产品数据
+     */
+    @PreAuthorize("hasAuthority('SCOPE_products.update')")
+    @PatchMapping("/products/{id}")
+    public R<Product> updateProduct(@AuthenticationPrincipal Jwt jwt, @PathVariable String id, @Validated(Update.class) @RequestBody ProductDTO productDTO) {
+        log.debug("[controller] updateProduct.....");
+        Long userId = JwtUtil.getUserIdFromJwt(jwt);
+        Product product = productService.updateProduct(userId, id, productDTO);
+        return R.ok("ok", product);
+    }
+
+    /**
+     * 删除自家产品 需要 商家 权限
+     * @param jwt 用户令牌
+     * @param id 产品ID
+     * @return {@code 200 OK}
+     */
+    @PreAuthorize("hasAuthority('SCOPE_products.delete')")
+    @DeleteMapping("/products/{id}")
+    public Response deleteProduct(@AuthenticationPrincipal Jwt jwt, @PathVariable String id) {
+        log.debug("[controller] deleteProduct.....");
+        Long userId = JwtUtil.getUserIdFromJwt(jwt);
+        productService.deleteProduct(userId, id);
+        return Response.ok();
+    }
+
 
     /**
      * 审核产品 需要 审核/管理员 权限
@@ -87,11 +124,50 @@ public class ProductController {
      * @return {@code 200 OK}
      */
     @PreAuthorize("hasAuthority('SCOPE_products.approve')")
-    @PostMapping("/products/{id}/approve")
+    @PatchMapping("/products/{id}/approve")
     public Response approveProduct(@AuthenticationPrincipal Jwt jwt, @PathVariable String id, @RequestBody AuditDTO auditDTO) {
         log.debug("[controller] approveProduct.....");
         Long userId = JwtUtil.getUserIdFromJwt(jwt);
         productService.approveProduct(userId, id, auditDTO);
         return Response.ok();
     }
+
+    /**
+     * 获取已发布产品详情 需要 用户 权限
+     * @param id 产品ID
+     * @return {@code 200 OK}产品详情
+     */
+    @PreAuthorize("hasAuthority('SCOPE_products.view')")
+    @GetMapping("/products/{id}")
+    public R<Product> getProduct(@PathVariable String id) {
+        log.debug("[controller] getProduct.....");
+        Product product = productService.getProductById(id);
+        return R.ok(product);
+    }
+
+    /**
+     * 获取所有产品 需要 管理员 权限
+     * @return {@code 200 OK}所有产品列表
+     */
+    @PreAuthorize("hasAuthority('SCOPE_products.get')")
+    @GetMapping("/products")
+    public R<List<Product>> getAllProducts() {
+        log.debug("[controller] getAllProducts.....");
+        List<Product> products = productService.getAllProducts();
+        return R.ok(products);
+    }
+
+    /**
+     * 获取商家所有产品 需要 商家 权限
+     * @return {@code 200 OK}商家所有产品列表
+     */
+    @PreAuthorize("hasAuthority('SCOPE_products.artisan.get')")
+    @GetMapping("/products/artisan")
+    public R<List<Product>> getArtisanProducts(@AuthenticationPrincipal Jwt jwt) {
+        log.debug("[controller] getArtisanProducts.....");
+        Long userId = JwtUtil.getUserIdFromJwt(jwt);
+        List<Product> products = productService.getProductsByArtisanId(userId);
+        return R.ok(products);
+    }
+
 }
