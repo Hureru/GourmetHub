@@ -1,12 +1,17 @@
 package com.hureru.iam.config;
 
+import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hureru.iam.bean.Users;
 import com.hureru.iam.exception.RestAccessDeniedHandler;
 import com.hureru.iam.exception.RestAuthenticationEntryPoint;
+import com.hureru.iam.oauth.SecurityUser;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.core.io.Resource;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,8 +27,11 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.jackson2.SecurityJackson2Modules;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.oidc.OidcScopes;
@@ -37,6 +45,7 @@ import org.springframework.security.oauth2.server.authorization.client.Registere
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
+import org.springframework.security.oauth2.server.authorization.jackson2.OAuth2AuthorizationServerJackson2Module;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
 import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
@@ -49,6 +58,7 @@ import java.security.KeyStore;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.time.Duration;
+import java.util.Collection;
 import java.util.UUID;
 
 /**
@@ -56,6 +66,7 @@ import java.util.UUID;
  *
  * @author zheng
  */
+@Slf4j
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -160,8 +171,83 @@ public class SecurityConfig {
      */
     @Bean
     public OAuth2AuthorizationService authorizationService(JdbcTemplate jdbcTemplate, RegisteredClientRepository registeredClientRepository) {
-        return new JdbcOAuth2AuthorizationService(jdbcTemplate, registeredClientRepository);
+        JdbcOAuth2AuthorizationService authorizationService = new JdbcOAuth2AuthorizationService(jdbcTemplate, registeredClientRepository);
+        JdbcOAuth2AuthorizationService.OAuth2AuthorizationRowMapper rowMapper = new JdbcOAuth2AuthorizationService.OAuth2AuthorizationRowMapper(registeredClientRepository);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        ClassLoader classLoader = JdbcOAuth2AuthorizationService.class.getClassLoader();
+        objectMapper.registerModules(SecurityJackson2Modules.getModules(classLoader));
+        objectMapper.registerModule(new OAuth2AuthorizationServerJackson2Module());
+
+        // --- 自定义 Mixin 区域 ---
+
+        // 1. 解决 Long 不在白名单的问题
+        objectMapper.addMixIn(Long.class, LongMixin.class);
+
+        // 2. 解决 ImmutableCollections$ListN 不在白名单的问题
+        try {
+            // 这个类是内部实现类，所以使用 Class.forName 来获取
+            Class<?> listNClass = Class.forName("java.util.ImmutableCollections$ListN");
+            objectMapper.addMixIn(listNClass, ListNMixin.class);
+        } catch (ClassNotFoundException e) {
+            log.warn("Could not find ImmutableCollections$ListN, skipping Mixin registration. This is expected on JDKs older than 9.");
+        }
+        objectMapper.addMixIn(SecurityUser.class, SecurityUserMixin.class);
+        objectMapper.addMixIn(Users.class, UsersMixin.class);
+
+        // --- Mixin 区域结束 ---
+
+        rowMapper.setObjectMapper(objectMapper);
+        authorizationService.setAuthorizationRowMapper(rowMapper);
+
+        return authorizationService;
     }
+
+    /**
+     * 为 Long 类型添加 Mixin。
+     */
+    @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
+    private static class LongMixin {}
+
+    /**
+     * 为 List.of(...) 创建的 List 类型添加 Mixin。
+     */
+    @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
+    private static class ListNMixin {}
+
+    /**
+     * 为 SecurityUser 类提供反序列化指导。
+     */
+    @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
+    @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE)
+    abstract static class SecurityUserMixin {
+
+        // 使用 @JsonCreator 告诉 Jackson 使用这个构造函数
+        @JsonCreator
+        SecurityUserMixin(
+                // 使用 @JsonProperty 将 JSON 字段映射到构造函数参数
+                @JsonProperty("user") Users user,
+                @JsonProperty("authorities") Collection<? extends GrantedAuthority> authorities) {}
+    }
+
+    /**
+     * 为你的数据库实体 Users 类提供反序列化指导。
+     * 即使它有默认构造函数，显式添加 Mixin 也能避免很多潜在问题。
+     */
+    @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
+    @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE)
+    abstract static class UsersMixin {
+        /**
+         * 使用 @JsonCreator 告诉 Jackson 使用这个构造函数来创建 Users 对象。
+         * @param email 对应 JSON 中的 "email" 字段。
+         * @param passwordHash 对应 JSON 中的 "passwordHash" 字段。
+         */
+        @JsonCreator
+        UsersMixin(
+                @JsonProperty("email") String email,
+                @JsonProperty("passwordHash") String passwordHash) {}
+    }
+
 
     /**
      * 配置基于 JDBC 的 OAuth2 授权同意服务。
