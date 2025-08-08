@@ -88,9 +88,9 @@ public class UsersController {
     }
 
     /**
-     * 内部接口 获取待审核商家列表
+     * 内部接口 验证商家是否有效
      *
-     * @return 待审核商家ID列表
+     * @return 是否有效
      */
     @GetMapping("/internal/isEffectiveArtisan")
     public Boolean isEffectiveArtisan(@RequestParam String id) {
