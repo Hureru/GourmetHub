@@ -1,8 +1,8 @@
 package com.hureru.iam.exception;
 
-import com.hureru.common.R;
 import com.hureru.common.Response;
 import com.hureru.common.exception.BusinessException;
+import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.ResponseEntity;
@@ -56,6 +56,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Response> handleDuplicateKeyException(DuplicateKeyException e) {
         log.error("数据已存在: {}", e.getMessage());
         return ResponseEntity.badRequest().body(Response.error(409, "数据已存在"));
+    }
+
+    @ExceptionHandler(FeignException.class)
+    public ResponseEntity<Response> handleFeignException(FeignException e) {
+        log.error("Feign异常: {}", e.getMessage());
+        return ResponseEntity.badRequest().body(Response.error(e.status(), e.getMessage()));
     }
 
 }
