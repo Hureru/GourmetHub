@@ -47,14 +47,15 @@ public class ArtisanController {
      *
      * @param jwt jwt
      * @param id 商家id
-     * @return 商家信息
+     * @return {@code 200 OK}商家信息
      */
     @PreAuthorize("hasAuthority('SCOPE_artisans.get')")
     @GetMapping("/artisan/{id}")
-    public Artisan getArtisanById(@AuthenticationPrincipal Jwt jwt, @PathVariable String id) {
+    public R<Artisan> getArtisanById(@AuthenticationPrincipal Jwt jwt, @PathVariable String id) {
         Long userId = JwtUtil.getUserIdFromJwt(jwt);
         log.debug("[controller] getArtisanById:{}", id);
-        return artisanService.getArtisanById(id, userId);
+        Artisan artisan = artisanService.getArtisanById(id, userId);
+        return R.ok(artisan);
     }
 
 

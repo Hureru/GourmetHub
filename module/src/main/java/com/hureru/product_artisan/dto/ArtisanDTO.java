@@ -6,6 +6,7 @@ import com.hureru.iam.dto.group.Update;
 import com.hureru.product_artisan.bean.Artisan;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
@@ -26,7 +27,7 @@ public class ArtisanDTO {
     private String name;
     @Size(min = 10, max = 200, message = "品牌故事长度需在10-200之间", groups = {Update.class, ChildCreate.class})
     private String brandStory;
-    @NotBlank(groups = {Update.class, ChildCreate.class})
+    @NotNull(groups = {Update.class, ChildCreate.class})
     private Artisan.Location location;
     @NotBlank(groups = {Update.class, ChildCreate.class})
     private String logoUrl;
