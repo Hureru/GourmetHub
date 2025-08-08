@@ -25,5 +25,8 @@ public class ProductDTO {
     private List<String> tags;
     private List<Product.Attribute> attributes;
 
+    /**
+     * 是否在审核成功后立即发布
+     */
     private Boolean isPublished;
 }
