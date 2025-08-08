@@ -1,7 +1,6 @@
 package com.hureru.iam.controller;
 
 
-import com.hureru.common.R;
 import com.hureru.common.Response;
 import com.hureru.common.utils.JwtUtil;
 import com.hureru.iam.RoleEnum;
@@ -13,9 +12,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * <p>
  * 用户与角色的多对多映射关系表 前端控制器
- * </p>
  *
  * @author zheng
  * @since 2025-07-26
