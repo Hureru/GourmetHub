@@ -7,6 +7,7 @@ import com.hureru.common.utils.JwtUtil;
 import com.hureru.iam.dto.group.Create;
 import com.hureru.iam.dto.group.Update;
 import com.hureru.product_artisan.bean.Product;
+import com.hureru.product_artisan.dto.ArtisanProductQueryDTO;
 import com.hureru.product_artisan.dto.AuditDTO;
 import com.hureru.product_artisan.dto.ProductDTO;
 import com.hureru.product_artisan.dto.ProductQueryDTO;
@@ -50,7 +51,7 @@ public class ProductController {
             @Min(5) @RequestParam(defaultValue = "10") int size) {
         PaginationData<Product> paginationData = productService.searchProducts(queryDTO, page, size, true);
         log.debug("[controller] searchProducts.....");
-        return R.ok("ok", paginationData);
+        return R.ok(paginationData);
     }
 
     /**
@@ -66,7 +67,7 @@ public class ProductController {
         log.debug("[controller] addProduct.....");
         Long userId = JwtUtil.getUserIdFromJwt(jwt);
         Product product = productService.saveProduct(userId, productDTO);
-        return R.ok("ok", product);
+        return R.ok(product);
     }
 
     /**
@@ -82,7 +83,7 @@ public class ProductController {
         log.debug("[controller] updateProduct.....");
         Long userId = JwtUtil.getUserIdFromJwt(jwt);
         Product product = productService.updateProduct(userId, id, productDTO);
-        return R.ok("ok", product);
+        return R.ok(product);
     }
 
     /**
@@ -131,27 +132,41 @@ public class ProductController {
     }
 
     /**
-     * 获取所有产品 需要 管理员 权限
+     * 分页获取所有产品 需要 管理员 权限
+     * @param queryDTO 查询条件，通过请求体传入
+     * @param page 当前页码 从 1 开始
+     * @param size 每页数量 最小为 5
      * @return {@code 200 OK}所有产品列表
      */
     @PreAuthorize("hasAuthority('SCOPE_products.get')")
     @GetMapping("/products")
-    public R<List<Product>> getAllProducts() {
+    public R<PaginationData<Product>> getAllProducts(
+            @RequestBody ArtisanProductQueryDTO queryDTO,
+            @Min(1) @RequestParam(defaultValue = "1") int page,
+            @Min(5) @RequestParam(defaultValue = "10") int size) {
         log.debug("[controller] getAllProducts.....");
-        List<Product> products = productService.getAllProducts();
-        return R.ok(products);
+        PaginationData<Product> paginationData = productService.getAllProducts(queryDTO, page, size);
+        return R.ok(paginationData);
     }
 
     /**
      * 获取商家所有产品 需要 商家 权限
+     * @param jwt 用户令牌
+     * @param queryDTO 筛选条件
+     * @param page 当前页码 从 1 开始
+     * @param size 每页数量 最小为 5
      * @return {@code 200 OK}商家所有产品列表
      */
     @PreAuthorize("hasAuthority('SCOPE_products.artisan.get')")
     @GetMapping("/products/artisan")
-    public R<List<Product>> getArtisanProducts(@AuthenticationPrincipal Jwt jwt) {
+    public R<PaginationData<Product>> getArtisanProducts(
+            @AuthenticationPrincipal Jwt jwt,
+            @RequestBody ArtisanProductQueryDTO queryDTO,
+            @Min(1) @RequestParam(defaultValue = "1") int page,
+            @Min(5) @RequestParam(defaultValue = "10") int size) {
         log.debug("[controller] getArtisanProducts.....");
         Long userId = JwtUtil.getUserIdFromJwt(jwt);
-        List<Product> products = productService.getProductsByArtisanId(userId);
+        PaginationData<Product> products = productService.getProductsByArtisanId(userId, queryDTO, page, size);
         return R.ok(products);
     }
 

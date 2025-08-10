@@ -1,5 +1,6 @@
 package com.hureru.product_artisan.service.Impl;
 
+import com.hureru.common.PaginationData;
 import com.hureru.common.exception.BusinessException;
 import com.hureru.product_artisan.bean.Artisan;
 import com.hureru.product_artisan.dto.ArtisanDTO;
@@ -9,6 +10,7 @@ import com.hureru.product_artisan.service.IArtisanService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -53,14 +55,45 @@ public class ArtisanServiceImpl implements IArtisanService {
     }
 
     @Override
-    public List<Artisan> getAllArtisans() {
-        return artisanRepository.findAll();
+    public PaginationData<Artisan> getAllArtisans(int page, int size) {
+        // 创建 Pageable 对象，可以添加默认排序
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("createdAt").descending());
+
+        // 查询总记录数 (不含分页)
+        long total = artisanRepository.count();
+
+        // 执行分页查询
+        Page<Artisan> productPage = artisanRepository.findAll(pageable);
+
+        // 转换为自定义的 PaginationData 对象返回
+        return new PaginationData<>(
+                productPage.getContent(),
+                total,
+                productPage.getTotalPages(),
+                productPage.getNumber(),
+                productPage.getSize()
+        );
     }
 
     @Override
-    public List<Artisan> getPendingArtisans() {
+    public PaginationData<Artisan> getPendingArtisans(int page, int size) {
         List<String> userIds = userFeignClient.getPendingUsers();
-        return artisanRepository.findByIdIn(userIds);
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("createdAt").descending());
+
+        // 查询总记录数 (不含分页)
+        long total = artisanRepository.count();
+
+        // 执行分页查询
+        Page<Artisan> productPage = artisanRepository.findByIdIn(userIds, pageable);
+
+        // 转换为自定义的 PaginationData 对象返回
+        return new PaginationData<>(
+                productPage.getContent(),
+                total,
+                productPage.getTotalPages(),
+                productPage.getNumber(),
+                productPage.getSize()
+        );
     }
 
     @Override

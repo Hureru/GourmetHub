@@ -4,6 +4,7 @@ import com.hureru.common.PaginationData;
 import com.hureru.common.exception.BusinessException;
 import com.hureru.product_artisan.bean.Artisan;
 import com.hureru.product_artisan.bean.Product;
+import com.hureru.product_artisan.dto.ArtisanProductQueryDTO;
 import com.hureru.product_artisan.dto.AuditDTO;
 import com.hureru.product_artisan.dto.ProductDTO;
 import com.hureru.product_artisan.dto.ProductQueryDTO;
@@ -128,10 +129,7 @@ public class ProductServiceImpl implements IProductService {
         return product;
     }
 
-    @Override
-    public List<Product> getAllProducts() {
-        return productRepository.findAll();
-    }
+
 
     @Override
     public List<Product> getPublishedProducts() {
@@ -140,11 +138,8 @@ public class ProductServiceImpl implements IProductService {
 
     @Override
     public PaginationData<Product> searchProducts(ProductQueryDTO queryDTO, int page, int size, boolean isPublished) {
-        // 创建 Pageable 对象，可以添加默认排序
-        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("createdAt").descending());
-
         // 1. 创建基础的过滤条件
-        Criteria criteria = null;
+        Criteria criteria;
         if (isPublished){
             criteria = new Criteria().andOperator(
                     Criteria.where("isPublished").is(true),
@@ -168,6 +163,72 @@ public class ProductServiceImpl implements IProductService {
                 criteria.andOperator(Criteria.where("$text").is(textCriteria));
             }
         }
+        return getPageProduct(criteria, page, size);
+    }
+
+    @Override
+    public List<Product> getProductsByName(String name) {
+        return productRepository.findByName(name);
+    }
+
+    @Override
+    public void deleteProduct(Long userId, String id) {
+        Product product = productRepository.findById(id).orElseThrow(() -> new BusinessException(404, "产品不存在"));
+        if (!product.getArtisanId().equals(userId.toString())) {
+            throw new BusinessException(403, "无删除权限");
+        }
+        productRepository.deleteById(id);
+    }
+
+    @Override
+    public PaginationData<Product> getProductsByArtisanId(Long userId, ArtisanProductQueryDTO queryDTO, int page, int size) {
+        queryDTO.setArtisanId(userId.toString());
+        return getByArtisanProductQueryDTO(queryDTO, page, size);
+    }
+
+    @Override
+    public PaginationData<Product> getAllProducts(ArtisanProductQueryDTO queryDTO, int page, int size) {
+        return getByArtisanProductQueryDTO(queryDTO, page, size);
+    }
+
+    private PaginationData<Product> getByArtisanProductQueryDTO(ArtisanProductQueryDTO queryDTO, int page, int size){
+        Criteria criteria = new Criteria();
+        if (queryDTO != null) {
+            // 如果工匠ID不为空，则添加精确匹配条件
+            if (StringUtils.hasText(queryDTO.getArtisanId())) {
+                criteria.and("artisanId").is(queryDTO.getArtisanId());
+            }
+
+            // SKU 和 name 互斥
+            if (StringUtils.hasText(queryDTO.getSku())) {
+                criteria.and("sku").is(queryDTO.getSku());
+            } else if (StringUtils.hasText(queryDTO.getName())) {
+                // 如果产品名不为空，则使用文本搜索
+                TextCriteria textCriteria = TextCriteria.forDefaultLanguage().matchingPhrase(queryDTO.getName());
+                criteria.andOperator(Criteria.where("$text").is(textCriteria));
+            }
+
+            // 分类
+            if (StringUtils.hasText(queryDTO.getCategoryId())) {
+                criteria.and("categoryId").is(queryDTO.getCategoryId());
+            }
+
+            // 审核状态
+            if (queryDTO.getStatus() != null) {
+                criteria.and("audit.status").is(queryDTO.getStatus());
+            }
+
+            // 是否 发布/审核后立即发布
+            if (queryDTO.getIsPublished() != null){
+                criteria.and("isPublished").is(queryDTO.getIsPublished());
+            }
+        }
+        return getPageProduct(criteria, page, size);
+    }
+
+    private PaginationData<Product> getPageProduct(Criteria criteria, int page, int size){
+        // 创建 Pageable 对象，可以添加默认排序
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("createdAt").descending());
 
         // 3. 创建 Query 对象
         Query query = new Query(criteria);
@@ -190,24 +251,5 @@ public class ProductServiceImpl implements IProductService {
                 productPage.getNumber(),
                 productPage.getSize()
         );
-    }
-
-    @Override
-    public List<Product> getProductsByName(String name) {
-        return productRepository.findByName(name);
-    }
-
-    @Override
-    public void deleteProduct(Long userId, String id) {
-        Product product = productRepository.findById(id).orElseThrow(() -> new BusinessException(404, "产品不存在"));
-        if (!product.getArtisanId().equals(userId.toString())) {
-            throw new BusinessException(403, "无删除权限");
-        }
-        productRepository.deleteById(id);
-    }
-
-    @Override
-    public List<Product> getProductsByArtisanId(Long userId) {
-        return productRepository.findByArtisanId(userId.toString());
     }
 }

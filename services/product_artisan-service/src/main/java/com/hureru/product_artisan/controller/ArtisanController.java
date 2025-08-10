@@ -1,5 +1,6 @@
 package com.hureru.product_artisan.controller;
 
+import com.hureru.common.PaginationData;
 import com.hureru.common.R;
 import com.hureru.common.Response;
 import com.hureru.common.utils.JwtUtil;
@@ -8,6 +9,7 @@ import com.hureru.iam.dto.group.Update;
 import com.hureru.product_artisan.bean.Artisan;
 import com.hureru.product_artisan.dto.ArtisanDTO;
 import com.hureru.product_artisan.service.IArtisanService;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -64,10 +66,12 @@ public class ArtisanController {
      */
     @PreAuthorize("hasAuthority('SCOPE_artisans.pendings')")
     @GetMapping("/artisan/pending")
-    public R<List<Artisan>> getPendingArtisans() {
+    public R<PaginationData<Artisan>> getPendingArtisans(
+            @Min(1) @RequestParam(defaultValue = "1") int page,
+            @Min(5) @RequestParam(defaultValue = "10") int size) {
         log.debug("[controller] getPendingArtisans.....");
-        List<Artisan> artisans = artisanService.getPendingArtisans();
-        return R.ok("success", artisans);
+        PaginationData<Artisan> artisans = artisanService.getPendingArtisans(page, size);
+        return R.ok(artisans);
     }
 
     /**

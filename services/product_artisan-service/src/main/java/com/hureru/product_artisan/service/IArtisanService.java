@@ -1,5 +1,6 @@
 package com.hureru.product_artisan.service;
 
+import com.hureru.common.PaginationData;
 import com.hureru.product_artisan.bean.Artisan;
 import com.hureru.product_artisan.dto.ArtisanDTO;
 
@@ -13,8 +14,8 @@ public interface IArtisanService {
     Artisan saveArtisan(Artisan artisan);
     Artisan saveArtisan(ArtisanDTO dto);
     Artisan getArtisanById(String id, Long operateId);
-    List<Artisan> getAllArtisans();
-    List<Artisan> getPendingArtisans();
+    PaginationData<Artisan> getAllArtisans(int page, int size);
+    PaginationData<Artisan> getPendingArtisans(int page, int size);
     List<Artisan> getArtisansByName(String name);
     void updateArtisan(Long operateId, String id, ArtisanDTO dto);
     void deleteArtisan(String id);

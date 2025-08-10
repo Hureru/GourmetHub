@@ -2,6 +2,7 @@ package com.hureru.product_artisan.service;
 
 import com.hureru.common.PaginationData;
 import com.hureru.product_artisan.bean.Product;
+import com.hureru.product_artisan.dto.ArtisanProductQueryDTO;
 import com.hureru.product_artisan.dto.AuditDTO;
 import com.hureru.product_artisan.dto.ProductDTO;
 import com.hureru.product_artisan.dto.ProductQueryDTO;
@@ -29,7 +30,7 @@ public interface IProductService {
     Product updateProduct(Long userId, String id, ProductDTO productDTO);
     void approveProduct(Long userId, String id, AuditDTO auditDTO);
     Product getProductById(String id);
-    List<Product> getAllProducts();
+    PaginationData<Product> getAllProducts(ArtisanProductQueryDTO queryDTO, int page, int size);
     List<Product> getPublishedProducts();
     /**
      * 根据动态条件分页查询产品
@@ -42,5 +43,5 @@ public interface IProductService {
     List<Product> getProductsByName(String name);
     void deleteProduct(Long userId, String id);
 
-    List<Product> getProductsByArtisanId(Long userId);
+    PaginationData<Product> getProductsByArtisanId(Long userId, ArtisanProductQueryDTO queryDTO, int page, int size);
 }
