@@ -1,11 +1,10 @@
 package com.hureru.product_artisan.service;
 
+import com.hureru.common.PaginationData;
 import com.hureru.product_artisan.bean.Product;
 import com.hureru.product_artisan.dto.AuditDTO;
 import com.hureru.product_artisan.dto.ProductDTO;
 import com.hureru.product_artisan.dto.ProductQueryDTO;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -35,10 +34,11 @@ public interface IProductService {
     /**
      * 根据动态条件分页查询产品
      * @param queryDTO 查询条件 DTO
-     * @param pageable 分页信息
+     * @param page 页码
+     * @param size 每页大小
      * @return 分页后的产品数据
      */
-    Page<Product> searchProducts(ProductQueryDTO queryDTO, Pageable pageable, boolean isPublished);
+    PaginationData<Product> searchProducts(ProductQueryDTO queryDTO, int page, int size, boolean isPublished);
     List<Product> getProductsByName(String name);
     void deleteProduct(Long userId, String id);
 

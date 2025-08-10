@@ -1,5 +1,6 @@
 package com.hureru.product_artisan.service.Impl;
 
+import com.hureru.common.PaginationData;
 import com.hureru.common.exception.BusinessException;
 import com.hureru.product_artisan.bean.Artisan;
 import com.hureru.product_artisan.bean.Product;
@@ -11,9 +12,7 @@ import com.hureru.product_artisan.repository.ProductRepository;
 import com.hureru.product_artisan.service.IProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -140,12 +139,20 @@ public class ProductServiceImpl implements IProductService {
     }
 
     @Override
-    public Page<Product> searchProducts(ProductQueryDTO queryDTO, Pageable pageable, boolean isPublished) {
+    public PaginationData<Product> searchProducts(ProductQueryDTO queryDTO, int page, int size, boolean isPublished) {
+        // 创建 Pageable 对象，可以添加默认排序
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("createdAt").descending());
+
         // 1. 创建基础的过滤条件
-        Criteria criteria = new Criteria().andOperator(
-                Criteria.where("isPublished").is(isPublished),
-                Criteria.where("audit.status").is(Product.AuditInfo.Status.APPROVED)
-        );
+        Criteria criteria = null;
+        if (isPublished){
+            criteria = new Criteria().andOperator(
+                    Criteria.where("isPublished").is(true),
+                    Criteria.where("audit.status").is(Product.AuditInfo.Status.APPROVED)
+            );
+        }else {
+            criteria = new Criteria();
+        }
 
         // 2. 动态构建查询条件
         if (queryDTO != null) {
@@ -173,9 +180,16 @@ public class ProductServiceImpl implements IProductService {
 
         // 5. 执行分页查询
         List<Product> list = mongoTemplate.find(query, Product.class);
+        PageImpl<Product> productPage = new PageImpl<>(list, pageable, total);
 
-        // 6. 封装成 Page 对象返回
-        return new PageImpl<>(list, pageable, total);
+        // 转换为自定义的 PaginationData 对象返回
+        return new PaginationData<>(
+                productPage.getContent(),
+                productPage.getTotalElements(),
+                productPage.getTotalPages(),
+                productPage.getNumber(),
+                productPage.getSize()
+        );
     }
 
     @Override

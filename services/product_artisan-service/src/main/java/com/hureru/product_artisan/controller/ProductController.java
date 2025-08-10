@@ -45,25 +45,10 @@ public class ProductController {
      */
     @PostMapping("/public/products")
     public R<PaginationData<Product>> searchProducts(
-            @RequestBody ProductQueryDTO queryDTO, // 从请求体获取查询条件
+            @RequestBody ProductQueryDTO queryDTO,
             @Min(1) @RequestParam(defaultValue = "1") int page,
             @Min(5) @RequestParam(defaultValue = "10") int size) {
-
-        // 创建 Pageable 对象，可以添加默认排序
-        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("createdAt").descending());
-
-        // 调用新的 service 方法
-        Page<Product> productPage = productService.searchProducts(queryDTO, pageable, true);
-
-        // 转换为自定义的 PaginationData 对象
-        PaginationData<Product> paginationData = new PaginationData<>(
-                productPage.getContent(),
-                productPage.getTotalElements(),
-                productPage.getTotalPages(),
-                productPage.getNumber(),
-                productPage.getSize()
-        );
-
+        PaginationData<Product> paginationData = productService.searchProducts(queryDTO, page, size, true);
         log.debug("[controller] searchProducts.....");
         return R.ok("ok", paginationData);
     }
