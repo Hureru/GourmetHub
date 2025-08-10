@@ -13,6 +13,4 @@ spring:
       - nacos:database.yaml
       - nacos:resource_oauth.yaml?group=COMMON
       - nacos:nacos.yaml?group=COMMON
-logging:
-  level:
-    com: debug
+      - nacos:rabbitmq.yaml?group=COMMON

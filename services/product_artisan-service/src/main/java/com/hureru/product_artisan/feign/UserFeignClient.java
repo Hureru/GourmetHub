@@ -21,7 +21,4 @@ public interface UserFeignClient {
     @GetMapping("/api/v1/internal/isEffectiveArtisan")
     Boolean isEffectiveArtisan(@RequestParam String id);
 
-    // 需要Token
-    @DeleteMapping("/api/v1/users/{id}")
-    R deleteUser(@PathVariable String id);
 }
