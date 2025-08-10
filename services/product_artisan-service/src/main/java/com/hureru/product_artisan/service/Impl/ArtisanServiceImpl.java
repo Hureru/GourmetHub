@@ -96,6 +96,7 @@ public class ArtisanServiceImpl implements IArtisanService {
             // 异常处理：例如记录日志，或者启动一个补偿任务
             log.error("发送删除用户消息到MQ失败, User ID: {}. 错误: {}", id, e.getMessage());
             // 这里可以抛出异常或进行其他补偿逻辑
+            //TODO 写入失败日志
             throw new BusinessException(500, "发送删除用户消息到MQ失败");
         }
     }

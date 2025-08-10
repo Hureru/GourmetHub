@@ -17,10 +17,13 @@ import com.hureru.product_artisan.bean.Artisan;
 import com.hureru.product_artisan.dto.ArtisanDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.List;
 
@@ -40,7 +43,7 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
     private final UserProfilesMapper userProfilesMapper;
     private final UserRoleMappingMapper userRoleMappingMapper;
     private final PasswordEncoder passwordEncoder;
-    private final ArtisanFeignClient artisanFeignClient;
+    private final RabbitTemplate rabbitTemplate;
 
 
     @Override
@@ -59,17 +62,33 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
 
     @Override
     @Transactional
-    //TODO OpenFeign 远程调用全局事务
+    // MQ 保证数据一致性
     public Users artisanRegister(ArtisanDTO artisanDTO) {
+        // 1. 在本地事务中创建用户和角色映射
         Users user = register(artisanDTO.getEmail(), artisanDTO.getPassword(), false);
-        // 添加 商家角色映射
         UserRoleMapping userRoleMapping = new UserRoleMapping(user.getId(), RoleEnum.ROLE_ARTISAN.getCode());
         userRoleMappingMapper.insert(userRoleMapping);
-        // 调用 product_artisan-service 服务 注册商家信息
+
+        // 2. 准备消息体，将新创建的用户ID设置到DTO中
         artisanDTO.setId(String.valueOf(user.getId()));
-        Artisan artisan = artisanFeignClient.addArtisan(artisanDTO);
-        log.info("dto: {}", artisanDTO);
-        log.info("调用OpenFeign[artisanFeignClient.addArtisan]:{}", artisan);
+
+        // 3. 注册一个事务同步回调，确保在事务成功提交后才发送消息
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                try {
+                    final String EXCHANGE_NAME = "gourmethub.direct";
+                    final String ROUTING_KEY = "routing.artisan.create";
+                    rabbitTemplate.convertAndSend(EXCHANGE_NAME, ROUTING_KEY, artisanDTO);
+                    log.info("事务提交成功，已发送创建商家消息到MQ, User ID: {}", user.getId());
+                } catch (Exception e) {
+                    log.error("发送创建商家消息到MQ失败, User ID: {}. 请手动处理！错误: {}", user.getId(), e.getMessage());
+                    //TODO 此处应有补偿机制，例如记录失败日志到数据库，由定时任务重试
+                }
+            }
+        });
+
+        // 4. 立即返回创建的用户信息给调用方
         return user;
     }
 
