@@ -13,8 +13,6 @@ spring:
         - nacos:database.yaml
         - nacos:oauth.yaml
         - nacos:nacos.yaml?group=COMMON
-        - nacos:rabbitmq.yaml?group=COMMON
-
-
+        - nacos:rocketmq.yaml?group=COMMON
 
 

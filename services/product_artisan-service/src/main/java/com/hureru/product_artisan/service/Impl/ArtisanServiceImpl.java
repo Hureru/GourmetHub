@@ -9,9 +9,10 @@ import com.hureru.product_artisan.repository.ArtisanRepository;
 import com.hureru.product_artisan.service.IArtisanService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -24,7 +25,10 @@ import java.util.List;
 public class ArtisanServiceImpl implements IArtisanService {
     private final ArtisanRepository artisanRepository;
     private final UserFeignClient userFeignClient;
-    private final RabbitTemplate rabbitTemplate;
+    private final RocketMQTemplate rocketMQTemplate;
+
+    // 定义 Topic 常量
+    public static final String TOPIC_ARTISAN_DELETE = "TOPIC_ARTISAN_DELETE";
 
     @Override
     public Artisan saveArtisan(Artisan artisan) {
@@ -111,26 +115,29 @@ public class ArtisanServiceImpl implements IArtisanService {
 
     // 使用MQ 异步删除用户
     @Override
+    @Transactional
     public void deleteArtisan(String id) {
-        // 1. 先删除本地的 Artisan 文档
+        // 1. 检查商家是否存在，防止发送无效消息
+        if (!artisanRepository.existsById(id)) {
+            log.warn("尝试删除不存在的商家, ID: {}", id);
+            // 可以选择直接返回或抛出异常，这里直接返回
+            return;
+        }
+
+        // 2. 先删除本地的 Artisan 文档 (MongoDB 操作)
         artisanRepository.deleteById(id);
         log.info("本地商家信息已删除, ID: {}", id);
 
-        // 2. 发送异步消息通知 iam-service 删除用户
-        // 定义交换机和路由键，最好使用常量
-        final String EXCHANGE_NAME = "gourmethub.direct";
-        final String ROUTING_KEY = "routing.user.delete";
-
+        // 3. 发送异步消息通知 iam-service 删除用户账号
+        //    使用 syncSend 来确保消息成功发送到 Broker，如果发送失败会抛出异常，
+        //    得益于 @Transactional 注解，本地的 MongoDB 删除操作也会被回滚。
         try {
-            // 使用 convertAndSend 发送消息，Spring 会自动处理序列化
-            rabbitTemplate.convertAndSend(EXCHANGE_NAME, ROUTING_KEY, id);
+            rocketMQTemplate.syncSend(TOPIC_ARTISAN_DELETE, id);
             log.info("成功发送删除用户消息到MQ, User ID: {}", id);
         } catch (Exception e) {
-            // 异常处理：例如记录日志，或者启动一个补偿任务
-            log.error("发送删除用户消息到MQ失败, User ID: {}. 错误: {}", id, e.getMessage());
-            // 这里可以抛出异常或进行其他补偿逻辑
-            //TODO 写入失败日志
-            throw new BusinessException(500, "发送删除用户消息到MQ失败");
+            log.error("发送删除用户消息到MQ失败, User ID: {}. 事务将回滚.", id, e);
+            // 抛出运行时异常，触发声明式事务的回滚
+            throw new RuntimeException("发送MQ消息失败，回滚商家删除操作", e);
         }
     }
 
