@@ -1,4 +1,4 @@
-package com.hureru.product_artisan.config;
+package com.hureru.order.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
