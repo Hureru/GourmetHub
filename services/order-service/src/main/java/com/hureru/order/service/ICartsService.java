@@ -12,5 +12,11 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @since 2025-07-26
  */
 public interface ICartsService extends IService<Carts> {
+    /**
+     * 获取用户购物车 id
+     * @param userId 用户 id
+     * @return 购物车 id
+     */
+    Long getUserCart(String userId);
 
 }

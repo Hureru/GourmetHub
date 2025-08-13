@@ -4,6 +4,7 @@ import com.hureru.order.bean.CartItems;
 import com.hureru.order.mapper.CartItemsMapper;
 import com.hureru.order.service.ICartItemsService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 /**
@@ -15,6 +16,13 @@ import org.springframework.stereotype.Service;
  * @since 2025-07-26
  */
 @Service
+@RequiredArgsConstructor
 public class CartItemsServiceImpl extends ServiceImpl<CartItemsMapper, CartItems> implements ICartItemsService {
+    private final ICartItemsService cartItemsService;
 
+
+    @Override
+    public boolean addCartItem(String cartId, String productId, Integer quantity) {
+        return false;
+    }
 }

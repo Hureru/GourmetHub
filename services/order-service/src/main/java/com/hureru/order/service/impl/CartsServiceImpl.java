@@ -1,5 +1,6 @@
 package com.hureru.order.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.hureru.order.bean.Carts;
 import com.hureru.order.mapper.CartsMapper;
 import com.hureru.order.service.ICartsService;
@@ -17,4 +18,14 @@ import org.springframework.stereotype.Service;
 @Service
 public class CartsServiceImpl extends ServiceImpl<CartsMapper, Carts> implements ICartsService {
 
+    @Override
+    public Long getUserCart(String userId) {
+        Carts cart = getOne(new QueryWrapper<Carts>().eq("user_id", userId));
+        if (cart != null) {
+            return cart.getId();
+        }
+        Carts arg = new Carts().setUserId(Long.valueOf(userId));
+        save(arg);
+        return arg.getId();
+    }
 }
