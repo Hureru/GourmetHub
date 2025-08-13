@@ -17,6 +17,6 @@ public interface ICartsService extends IService<Carts> {
      * @param userId 用户 id
      * @return 购物车 id
      */
-    Long getUserCart(String userId);
+    Long getUserCart(Long userId);
 
 }

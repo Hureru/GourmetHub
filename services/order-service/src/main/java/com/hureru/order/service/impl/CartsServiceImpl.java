@@ -20,12 +20,12 @@ public class CartsServiceImpl extends ServiceImpl<CartsMapper, Carts> implements
 
     @Override
     //TODO 使用 Redis 缓存
-    public Long getUserCart(String userId) {
+    public Long getUserCart(Long userId) {
         Carts cart = getOne(new QueryWrapper<Carts>().eq("user_id", userId));
         if (cart != null) {
             return cart.getId();
         }
-        Carts arg = new Carts().setUserId(Long.valueOf(userId));
+        Carts arg = new Carts().setUserId(userId);
         save(arg);
         return arg.getId();
     }

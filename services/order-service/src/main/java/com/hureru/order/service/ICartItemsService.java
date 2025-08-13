@@ -21,7 +21,7 @@ public interface ICartItemsService extends IService<CartItems> {
      * @param quantity 数量 可以为 负
      * @return 添加成功
      */
-    boolean updateCartItem(String userId, String productId, Integer quantity);
+    boolean updateCartItem(Long userId, String productId, Integer quantity);
 
     /**
      * 批量添加购物车项 数量默认为 1
@@ -29,13 +29,13 @@ public interface ICartItemsService extends IService<CartItems> {
      * @param productIds 商品 id
      * @return 添加成功
      */
-    boolean batchAddCartItems(String userId, Collection<String> productIds);
+    boolean batchAddCartItems(Long userId, Collection<String> productIds);
 
     /**
      * 批量删除购物车项
      * @param userId 用户 id
-     * @param productIds 商品 id
+     * @param cartItemId 购物车项 id
      * @return 删除成功
      */
-    boolean batchRemoveCartItems(String userId, Collection<Long> productIds);
+    boolean batchRemoveCartItems(Long userId, Collection<Long> cartItemId);
 }

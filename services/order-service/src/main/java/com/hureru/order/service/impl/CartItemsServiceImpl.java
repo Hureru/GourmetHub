@@ -31,7 +31,7 @@ public class CartItemsServiceImpl extends ServiceImpl<CartItemsMapper, CartItems
 
     @Override
     @Transactional
-    public boolean updateCartItem(String userId, String productId, Integer quantity) {
+    public boolean updateCartItem(Long userId, String productId, Integer quantity) {
         // 获取购物车 ID（一个用户一个购物车）
         Long cartId = cartsService.getUserCart(userId);
 
@@ -68,7 +68,7 @@ public class CartItemsServiceImpl extends ServiceImpl<CartItemsMapper, CartItems
 
     @Override
     @Transactional
-    public boolean batchAddCartItems(String userId, Collection<String> productIds) {
+    public boolean batchAddCartItems(Long userId, Collection<String> productIds) {
         Long cartId = cartsService.getUserCart(userId);
         if (productIds == null || productIds.isEmpty()) {
             return false;
@@ -117,15 +117,15 @@ public class CartItemsServiceImpl extends ServiceImpl<CartItemsMapper, CartItems
 
     @Override
     @Transactional
-    public boolean batchRemoveCartItems(String userId, Collection<Long> productIds) {
+    public boolean batchRemoveCartItems(Long userId, Collection<Long> cartItemId) {
         Long cartId = cartsService.getUserCart(userId);
-        if (productIds == null || productIds.isEmpty()) {
+        if (cartItemId == null || cartItemId.isEmpty()) {
             return false;
         }
 
         return this.lambdaUpdate()
                 .eq(CartItems::getCartId, cartId)
-                .in(CartItems::getProductId, productIds)
+                .in(CartItems::getId, cartItemId)
                 .remove();
     }
 }
