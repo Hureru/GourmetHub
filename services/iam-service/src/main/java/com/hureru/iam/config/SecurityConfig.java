@@ -361,7 +361,7 @@ public class SecurityConfig {
                         .scope("write")
                         .tokenSettings(tokenSettings)
                         .clientSettings(ClientSettings.builder()
-                                .requireAuthorizationConsent(true)
+                                .requireAuthorizationConsent(false)
                                 .requireProofKey(true)
                                 .build())
                         .build();
