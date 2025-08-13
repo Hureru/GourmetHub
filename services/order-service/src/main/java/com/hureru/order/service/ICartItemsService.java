@@ -13,9 +13,11 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface ICartItemsService extends IService<CartItems> {
     /**
-     * 添加购物车项
-     * @param cartItems 购物车项
+     * 更新购物车项
+     * @param userId 用户 id
+     * @param productId 商品 id
+     * @param quantity 数量 可以为 负
      * @return 添加成功
      */
-    boolean addCartItem(String cartId, String productId, Integer quantity);
+    boolean updateCartItem(String userId, String productId, Integer quantity);
 }

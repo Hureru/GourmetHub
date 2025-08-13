@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 public class CartsServiceImpl extends ServiceImpl<CartsMapper, Carts> implements ICartsService {
 
     @Override
+    //TODO 使用 Redis 缓存
     public Long getUserCart(String userId) {
         Carts cart = getOne(new QueryWrapper<Carts>().eq("user_id", userId));
         if (cart != null) {
