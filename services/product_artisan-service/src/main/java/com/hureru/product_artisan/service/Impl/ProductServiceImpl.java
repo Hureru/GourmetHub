@@ -2,6 +2,7 @@ package com.hureru.product_artisan.service.Impl;
 
 import com.hureru.common.PaginationData;
 import com.hureru.common.exception.BusinessException;
+import com.hureru.order.dto.StockDeductionRequest;
 import com.hureru.product_artisan.bean.Artisan;
 import com.hureru.product_artisan.bean.Product;
 import com.hureru.product_artisan.dto.ArtisanProductQueryDTO;
@@ -11,14 +12,18 @@ import com.hureru.product_artisan.dto.ProductQueryDTO;
 import com.hureru.product_artisan.repository.ArtisanRepository;
 import com.hureru.product_artisan.repository.ProductRepository;
 import com.hureru.product_artisan.service.IProductService;
+import com.mongodb.client.result.UpdateResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.data.domain.*;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.TextCriteria;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
@@ -35,6 +40,9 @@ public class ProductServiceImpl implements IProductService {
     private final ProductRepository productRepository;
     private final ArtisanRepository artisanRepository;
     private final MongoTemplate mongoTemplate;
+    private final RocketMQTemplate rocketMQTemplate;
+
+    public static final String TOPIC = "COMPENSATE_STOCK_TOPIC";
 
     @Override
     public Product saveProduct(Long userId, ProductDTO productDTO) {
@@ -184,6 +192,47 @@ public class ProductServiceImpl implements IProductService {
     public PaginationData<Product> getProductsByArtisanId(Long userId, ArtisanProductQueryDTO queryDTO, int page, int size) {
         queryDTO.setArtisanId(userId.toString());
         return getByArtisanProductQueryDTO(queryDTO, page, size);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deductStock(StockDeductionRequest request) {
+        log.info("开始处理库存扣减, orderId: {}", request.getOrderSn());
+        for (StockDeductionRequest.OrderItemDTO item : request.getItems()) {
+            // 加乐观锁
+            // 使用 MongoTemplate 实现库存扣减
+            // 1. 先查出当前版本号
+            Product product = mongoTemplate.findById(item.getProductId(), Product.class);
+            if (product == null) {
+                throw new BusinessException(404, "商品不存在: " + item.getProductId());
+            }
+
+            Long currentVersion = product.getVersion();
+
+            // 2. 更新时加版本匹配条件
+            Query query = new Query(Criteria.where("_id").is(item.getProductId())
+                    .and("stockQuantity").gte(item.getQuantity())
+                    // 乐观锁条件
+                    .and("version").is(currentVersion));
+
+            Update update = new Update()
+                    .inc("stockQuantity", -item.getQuantity())
+                    .inc("version", 1)
+                    .set("updatedAt", LocalDateTime.now());
+
+            UpdateResult result = mongoTemplate.updateFirst(query, update, Product.class);
+
+            if (result.getModifiedCount() == 0) {
+                // 库存不足或版本不匹配，扣减失败
+                log.warn("库存扣减失败, 商品ID: {}, 数量: {}. 发送补偿消息.", item.getProductId(), item.getQuantity());
+                // 发送补偿消息，通知订单服务取消订单
+                rocketMQTemplate.syncSend(TOPIC, request.getOrderSn());
+                // 抛出异常，确保当前事务回滚
+                throw new BusinessException(500, "库存扣减失败，商品ID: " + item.getProductId());
+            }
+        }
+        log.info("库存扣减成功, orderId: {}", request.getOrderSn());
+        // 如果所有商品都扣减成功，事务将在此处提交
     }
 
     @Override
