@@ -2,6 +2,9 @@ package com.hureru.order.service;
 
 import com.hureru.order.bean.Orders;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.hureru.order.dto.CreateOrderDirectlyDTO;
+import com.hureru.order.dto.CreateOrderFromCartDTO;
+import com.hureru.order.dto.OrderTransactionPayload;
 
 /**
  * <p>
@@ -12,5 +15,15 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @since 2025-07-26
  */
 public interface IOrdersService extends IService<Orders> {
+    String createOrderFromCart(Long userId, CreateOrderFromCartDTO dto);
 
+    String createOrderDirectly(Long userId, CreateOrderDirectlyDTO dto);
+
+    Orders getOrderByOrderId(String orderId);
+
+    // 本地事务方法
+    boolean executeCreateOrderTransaction(OrderTransactionPayload payload);
+
+    // 订单取消方法
+    void cancelOrder(String orderId);
 }
