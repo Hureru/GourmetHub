@@ -1,6 +1,7 @@
 package com.hureru.product_artisan.service;
 
 import com.hureru.common.PaginationData;
+import com.hureru.order.dto.StockDeductionRequest;
 import com.hureru.product_artisan.bean.Product;
 import com.hureru.product_artisan.dto.ArtisanProductQueryDTO;
 import com.hureru.product_artisan.dto.AuditDTO;
@@ -44,4 +45,10 @@ public interface IProductService {
     void deleteProduct(Long userId, String id);
 
     PaginationData<Product> getProductsByArtisanId(Long userId, ArtisanProductQueryDTO queryDTO, int page, int size);
+
+    /**
+     * 扣减库存
+     * @param request 包含订单ID和商品列表
+     */
+    void deductStock(StockDeductionRequest request);
 }
