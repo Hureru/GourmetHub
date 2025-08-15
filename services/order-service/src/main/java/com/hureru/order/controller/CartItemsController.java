@@ -21,7 +21,7 @@ import java.util.List;
  */
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/cart-items")
 public class CartItemsController {
     private final ICartItemsService cartItemsService;
 
@@ -32,7 +32,7 @@ public class CartItemsController {
      * @param quantity  数量
      * @return {@code 200 OK} 购物车项更新成功
      */
-    @PatchMapping("/cart-items/{id}")
+    @PatchMapping("/{id}")
     @PreAuthorize("hasAuthority('SCOPE_cart-items.update')")
     public Response updateCartItem(@AuthenticationPrincipal Jwt jwt, @PathVariable("id") String productId, @RequestParam Integer quantity) {
         Long userId = JwtUtil.getUserIdFromJwt(jwt);
@@ -49,7 +49,7 @@ public class CartItemsController {
      * @param productIds 商品ID
      * @return {@code 200 OK} 购物车项添加成功
      */
-    @PostMapping("/cart-items")
+    @PostMapping
     @PreAuthorize("hasAuthority('SCOPE_cart-items.create')")
     public Response addCartItems(@AuthenticationPrincipal Jwt jwt, @RequestBody String[] productIds) {
         Long userId = JwtUtil.getUserIdFromJwt(jwt);
@@ -66,7 +66,7 @@ public class CartItemsController {
      * @param cartItemId 购物车项ID
      * @return {@code 200 OK} 购物车项删除成功
      */
-    @DeleteMapping("/cart-items")
+    @DeleteMapping
     @PreAuthorize("hasAuthority('SCOPE_cart-items.delete')")
     public Response removeCartItems(@AuthenticationPrincipal Jwt jwt, @RequestBody Long[] cartItemId) {
         Long userId = JwtUtil.getUserIdFromJwt(jwt);
