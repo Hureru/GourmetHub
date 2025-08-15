@@ -21,6 +21,8 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * @author zheng
  */
@@ -46,6 +48,13 @@ public class ProductController {
         PaginationData<Product> paginationData = productService.searchProducts(queryDTO, page, size, true);
         log.debug("[controller] searchProducts.....");
         return R.ok(paginationData);
+    }
+
+    @GetMapping("/internal/products/batch")
+    public R<List<Product>> getProductsByIds(@RequestParam("ids") List<String> ids) {
+        log.debug("[controller] getProductsByIds.....");
+        List<Product> products = productService.getProductsByIds(ids);
+        return R.ok(products);
     }
 
     /**

@@ -27,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -233,6 +234,18 @@ public class ProductServiceImpl implements IProductService {
         }
         log.info("库存扣减成功, orderId: {}", request.getOrderSn());
         // 如果所有商品都扣减成功，事务将在此处提交
+    }
+
+    @Override
+    public List<Product> getProductsByIds(List<String> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return Collections.emptyList();
+        }
+        Criteria criteria = Criteria.where("audit.status").is(Product.AuditInfo.Status.APPROVED)
+                .and("isPublished").is(true)
+                .and("_id").in(ids);
+        Query query = new Query(criteria);
+        return mongoTemplate.find(query, Product.class);
     }
 
     @Override

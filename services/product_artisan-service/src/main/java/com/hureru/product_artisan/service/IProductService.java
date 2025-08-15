@@ -51,4 +51,6 @@ public interface IProductService {
      * @param request 包含订单ID和商品列表
      */
     void deductStock(StockDeductionRequest request);
+
+    List<Product> getProductsByIds(List<String> ids);
 }
