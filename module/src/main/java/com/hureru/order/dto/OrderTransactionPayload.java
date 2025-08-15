@@ -1,8 +1,10 @@
 package com.hureru.order.dto;
 
 import com.hureru.order.dto.StockDeductionRequest.OrderItemDTO;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
@@ -12,6 +14,8 @@ import java.util.List;
  */
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class OrderTransactionPayload {
     private Long userId;
     private Long addressId;

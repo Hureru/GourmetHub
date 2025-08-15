@@ -62,11 +62,11 @@ public class Addresses implements Serializable {
     @Override
     public String toString() {
         return "{" +
-                "recipientName:\"" + recipientName + '"' +
-                ", phoneNumber:\"" + phoneNumber + '"' +
-                ", stateProvince:\"" + stateProvince + '"' +
-                ", city:\"" + city + '"' +
-                ", streetAddress:\"" + streetAddress + '"' +
+                "\"recipientName\":\"" + recipientName + '"' +
+                ", \"phoneNumber\":\"" + phoneNumber + '"' +
+                ", \"stateProvince\":\"" + stateProvince + '"' +
+                ", \"city\":\"" + city + '"' +
+                ", \"streetAddress\":\"" + streetAddress + '"' +
                 '}';
     }
 }
