@@ -1,5 +1,6 @@
 package com.hureru.order.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hureru.common.exception.BusinessException;
@@ -194,6 +195,7 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         OrderItems orderItem = new OrderItems();
         orderItem.setOrderId(order.getId());
         orderItem.setProductId(itemDTO.getProductId());
+        orderItem.setProductSnapshot(JSON.toJSONString(product));
         orderItem.setQuantity(itemDTO.getQuantity());
         // 单价
         Number amount = product.getPrice().getAmount();
@@ -203,6 +205,7 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                 // 除以100得到元，保留2位小数
                 .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
         orderItem.setPriceAtPurchase(priceAtPurchase);
+        orderItem.setShippingStatus(OrderStatus.AWAITING_PAYMENT);
         return orderItem;
     }
 
