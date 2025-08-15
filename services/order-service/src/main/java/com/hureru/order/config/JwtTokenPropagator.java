@@ -1,4 +1,4 @@
-package com.hureru.product_artisan.config;
+package com.hureru.order.config;
 
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
