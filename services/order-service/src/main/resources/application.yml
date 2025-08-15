@@ -1,22 +1,21 @@
 spring:
-  application:
-    name: order-service
-  datasource:
-    url: jdbc:mysql://localhost:3307/db_order?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
-    username: root
-    password: 123456
-    driver-class-name: com.mysql.cj.jdbc.Driver
-server:
-  port: 20000
-
-mybatis-plus:
-#  mapper-locations: classpath:/mapper/**/*.xml # (可选)
-  global-config:
-    db-config:
-      id-type: auto # (可选) 主键自增
-  configuration:  # 开启日志
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl # (可选)
+  profiles:
+    active: ${ENV:dev}
+  cloud:
+    nacos:
+      config:
+        server-addr: 127.0.0.1:8848
+        namespace: "${spring.profiles.active}"
+        group: ORDER_SERVICE
+  config:
+    import:
+      - nacos:order.yaml
+      - nacos:database.yaml
+      - nacos:resource_oauth.yaml?group=COMMON
+      - nacos:nacos.yaml?group=COMMON
+      - nacos:rocketmq.yaml?group=COMMON
 
 order-id:
   worker-id: 1
   datacenter-id: 1
+
