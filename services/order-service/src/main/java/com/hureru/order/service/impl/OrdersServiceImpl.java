@@ -64,7 +64,7 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         // 1. 根据传入的 cartItemIds 查询购物车商品
         List<CartItems> cartItems = cartItemsMapper.selectBatchIds(dto.getCartItemIds());
 
-        // 2. 校验
+        // 2. 校验购物车项
         if (CollectionUtils.isEmpty(cartItems)) {
             throw new BusinessException(404, "选择的商品不存在或已失效");
         }
@@ -84,9 +84,12 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                 .map(item -> new OrderItemDTO(item.getProductId(), item.getQuantity()))
                 .collect(Collectors.toList());
 
+        // 3. 【新增】前置同步校验商品状态和库存
+        validateProducts(orderItems);
+
         String orderId = String.valueOf(orderIdUtil.nextId());
 
-        // 3. 构造事务消息Payload
+        // 4. 构造事务消息Payload
         OrderTransactionPayload payload = OrderTransactionPayload.builder()
                 .userId(userId)
                 .addressId(dto.getAddressId())
@@ -98,7 +101,7 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                 .orderSn(orderId)
                 .build();
 
-        // 4. 发送事务消息
+        // 5. 发送事务消息
         rocketMQTemplate.sendMessageInTransaction(
                 TX_ORDER_TOPIC,
                 MessageBuilder.withPayload(payload).build(),
@@ -111,6 +114,11 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     @Override
     public String createOrderDirectly(Long userId, CreateOrderDirectlyDTO dto) {
         OrderItemDTO orderItem = new OrderItemDTO(dto.getProductId(), dto.getQuantity());
+        List<OrderItemDTO> orderItems = Collections.singletonList(orderItem);
+
+        // 【新增】前置同步校验商品状态和库存
+        validateProducts(orderItems);
+
         String orderId = String.valueOf(orderIdUtil.nextId());
 
         // 1. 构造事务消息Payload
@@ -131,6 +139,43 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         );
 
         return orderId;
+    }
+
+    /**
+     * 【新增】前置商品校验方法
+     * @param itemsToValidate 需要校验的商品列表
+     */
+    private void validateProducts(List<OrderItemDTO> itemsToValidate) {
+        log.info("开始前置校验商品状态...");
+        List<String> productIds = itemsToValidate.stream().map(OrderItemDTO::getProductId).collect(Collectors.toList());
+        if (productIds.isEmpty()) {
+            throw new BusinessException(503, "商品列表不能为空");
+        }
+
+        // 远程调用商品服务获取商品信息
+        List<Product> products = productFeignClient.getProductsByIds(productIds).getData();
+
+        // 校验返回结果
+        if (CollectionUtils.isEmpty(products) || products.size() != productIds.size()) {
+            throw new BusinessException(404, "部分商品已下架或不存在");
+        }
+
+        Map<String, Product> productMap = products.stream().collect(Collectors.toMap(Product::getId, p -> p));
+
+        for (OrderItemDTO item : itemsToValidate) {
+            Product product = productMap.get(item.getProductId());
+            // 双重保险
+            if (product == null) {
+                throw new BusinessException(404, "商品ID: " + item.getProductId() + " 不存在");
+            }
+            if (product.getIsPublished() == null || !product.getIsPublished()) {
+                throw new BusinessException(404, "商品 '" + product.getName() + "' 已下架");
+            }
+            if (product.getStockQuantity() < item.getQuantity()) {
+                throw new BusinessException(500, "商品 '" + product.getName() + "' 库存不足");
+            }
+        }
+        log.info("前置商品校验通过");
     }
 
     @Override

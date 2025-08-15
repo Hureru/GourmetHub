@@ -21,7 +21,7 @@ import org.springframework.messaging.Message;
 public class OrderTransactionListener implements RocketMQLocalTransactionListener {
 
     private final IOrdersService ordersService;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
 
     /**
      * 执行本地事务
