@@ -24,4 +24,6 @@ public interface IAddressesService extends IService<Addresses> {
     void updateDefaultAddr(Long addrId, Long userId);
 
     void deleteAddress(Long addrId, Long userId);
+
+    String getAddressById(Long addrId, Long userId);
 }

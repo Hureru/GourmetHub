@@ -123,6 +123,15 @@ public class AddressesServiceImpl extends ServiceImpl<AddressesMapper, Addresses
         }
     }
 
+    @Override
+    public String getAddressById(Long addrId, Long userId) {
+        Addresses address = getById(addrId);
+        if (address != null && address.getUserId().equals(userId)) {
+            return address.toString();
+        }
+        throw new BusinessException(404, "配送地址不存在");
+    }
+
 
     private void checkUserAddr(Long addrId, Long userId) {
         Addresses existingAddress = getById(addrId);

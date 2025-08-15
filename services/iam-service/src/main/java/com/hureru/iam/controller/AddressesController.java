@@ -46,6 +46,19 @@ public class AddressesController {
     }
 
     /**
+     * 内部接口，获取指定配送地址
+     * @param jwt 用户令牌
+     * @param addrId 配送地址ID
+     * @return 配送地址 JSON
+     */
+    @GetMapping("/internal/{id}")
+    public String getAddressById(@AuthenticationPrincipal Jwt jwt, @PathVariable("id") Long addrId){
+        // 从JWT中获取用户ID
+        Long userId = JwtUtil.getUserIdFromJwt(jwt);
+        return addressesService.getAddressById(addrId, userId);
+    }
+
+    /**
      * 受保护接口, 为当前用户添加新配送地址, 具有上限：10
      * @param jwt 用户令牌
      * @param address 配送地址
