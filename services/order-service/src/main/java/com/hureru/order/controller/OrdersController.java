@@ -1,9 +1,20 @@
 package com.hureru.order.controller;
 
 
-import org.springframework.web.bind.annotation.RequestMapping;
-
-import org.springframework.web.bind.annotation.RestController;
+import com.hureru.common.R;
+import com.hureru.common.utils.JwtUtil;
+import com.hureru.order.bean.Orders;
+import com.hureru.order.dto.CreateOrderDirectlyDTO;
+import com.hureru.order.dto.CreateOrderFromCartDTO;
+import com.hureru.order.service.IOrdersService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * 订单主表 前端控制器
@@ -12,7 +23,44 @@ import org.springframework.web.bind.annotation.RestController;
  * @since 2025-07-26
  */
 @RestController
-@RequestMapping("/orders")
+@RequiredArgsConstructor
+@RequestMapping("/api/v1/orders")
 public class OrdersController {
+    private final IOrdersService ordersService;
 
+    /**
+     * 从购物车创建订单 (已更新为按选中项结算)
+     */
+    @PostMapping("/from-cart")
+    @PreAuthorize("hasAuthority('SCOPE_orders.create')")
+    public R<String> createOrderFromCart(
+            @AuthenticationPrincipal Jwt jwt,
+            @Validated @RequestBody CreateOrderFromCartDTO dto) {
+        Long userId = JwtUtil.getUserIdFromJwt(jwt);
+        String orderId = ordersService.createOrderFromCart(userId, dto);
+        return R.ok("订单创建中，请稍后查看状态", orderId);
+    }
+
+    /**
+     * 直接购买创建订单
+     */
+    @PostMapping("/directly")
+    @PreAuthorize("hasAuthority('SCOPE_orders.create')")
+    public R<String> createOrderDirectly(
+            @AuthenticationPrincipal Jwt jwt,
+            @Validated @RequestBody CreateOrderDirectlyDTO dto) {
+        Long userId = JwtUtil.getUserIdFromJwt(jwt);
+        String orderId = ordersService.createOrderDirectly(userId, dto);
+        return R.ok("订单创建中，请稍后查看状态", orderId);
+    }
+
+    /**
+     * 根据业务订单ID查询订单
+     */
+    @GetMapping("/{orderId}")
+    @PreAuthorize("hasAuthority('SCOPE_orders.view')")
+    public R<Orders> getOrderByOrderId(@PathVariable String orderId) {
+        Orders order = ordersService.getOrderByOrderId(orderId);
+        return R.ok(order);
+    }
 }
