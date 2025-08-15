@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import java.io.Serializable;
+
+import com.hureru.order.OrderStatus;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -48,6 +50,6 @@ public class OrderItems implements Serializable {
     private BigDecimal priceAtPurchase;
 
     @ApiModelProperty(value = "商品状态")
-    private Orders.Status shippingStatus;
+    private OrderStatus shippingStatus;
 
 }

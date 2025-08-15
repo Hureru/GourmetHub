@@ -6,6 +6,8 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import java.time.LocalDateTime;
 import java.io.Serializable;
+
+import com.hureru.order.OrderStatus;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -46,7 +48,7 @@ public class Orders implements Serializable {
     private String paymentMethod;
 
     @ApiModelProperty(value = "订单状态")
-    private Status status;
+    private OrderStatus status;
 
     @ApiModelProperty(value = "收货地址快照，JSON格式，防止地址变更影响历史订单")
     private String shippingAddress;
@@ -63,14 +65,5 @@ public class Orders implements Serializable {
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
-
-    public enum Status {
-        PENDING_PAYMENT,
-        PROCESSING,
-        SHIPPED,
-        DELIVERED,
-        COMPLETED,
-        CANCELLED
-    }
 
 }

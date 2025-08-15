@@ -59,5 +59,14 @@ public class Addresses implements Serializable {
     @ApiModelProperty(value = "记录最后更新时间")
     private LocalDateTime updatedAt;
 
-
+    @Override
+    public String toString() {
+        return "{" +
+                "recipientName:\"" + recipientName + '"' +
+                ", phoneNumber:\"" + phoneNumber + '"' +
+                ", stateProvince:\"" + stateProvince + '"' +
+                ", city:\"" + city + '"' +
+                ", streetAddress:\"" + streetAddress + '"' +
+                '}';
+    }
 }
