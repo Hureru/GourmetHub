@@ -12,12 +12,12 @@ import java.util.List;
 /**
  * @author zheng
  */
-@FeignClient(name = "product-artisan-service", path = "/api/v1/products")
+@FeignClient(name = "product-artisan-service", path = "/api/v1")
 public interface ProductFeignClient {
 
-    @GetMapping("/{id}")
+    @GetMapping("/products/{id}")
     R<Product> getProduct(@PathVariable String id);
 
-    @GetMapping("/batch")
+    @GetMapping("/internal/products/batch")
     R<List<Product>> getProductsByIds(@RequestParam("ids") List<String> ids);
 }

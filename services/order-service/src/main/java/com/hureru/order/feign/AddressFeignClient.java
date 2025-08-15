@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 /**
  * @author zheng
  */
-@FeignClient(name = "iam-service", path = "/api/v1/users/me/addresses")
+@FeignClient(name = "iam-service", path = "/api/v1")
 public interface AddressFeignClient {
-    @GetMapping("/{id}")
+    @GetMapping("/internal/addresses/{id}")
     String getAddressById(@PathVariable("id") Long addrId);
 }
