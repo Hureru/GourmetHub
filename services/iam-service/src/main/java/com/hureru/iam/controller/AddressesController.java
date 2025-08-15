@@ -51,7 +51,7 @@ public class AddressesController {
      * @param addrId 配送地址ID
      * @return 配送地址 JSON
      */
-    @GetMapping("/internal/{id}")
+    @GetMapping("/internal/addresses/{id}")
     public String getAddressById(@AuthenticationPrincipal Jwt jwt, @PathVariable("id") Long addrId){
         // 从JWT中获取用户ID
         Long userId = JwtUtil.getUserIdFromJwt(jwt);
