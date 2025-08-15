@@ -32,7 +32,7 @@ public class GlobalExceptionHandler {
         bindingResult.getFieldErrors().forEach(error ->
                 errors.put(error.getField(), error.getDefaultMessage()));
         log.error("[Binding]参数验证失败：{}", errors);
-        return ResponseEntity.badRequest()
+        return ResponseEntity.ok()
                 .body(Response.error(400, "参数校验失败：" + errors));
     }
 
@@ -41,7 +41,7 @@ public class GlobalExceptionHandler {
         Map<String, String> errors = new HashMap<>();
         ex.getAllValidationResults().forEach(result -> result.getResolvableErrors().forEach(error -> errors.put(result.getMethodParameter().getParameterName(), error.getDefaultMessage())));
         log.error("[Method]参数验证失败: {}", errors);
-        return ResponseEntity.badRequest()
+        return ResponseEntity.ok()
                 .body(Response.error(400, "参数校验失败：" + errors));
     }
 
@@ -49,19 +49,19 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<Response> handleBusinessException(BusinessException e) {
         log.error("业务异常: {}", e.getMessage());
-        return ResponseEntity.badRequest().body(Response.error(e.getCode(), e.getMessage()));
+        return ResponseEntity.ok().body(Response.error(e.getCode(), e.getMessage()));
     }
 
     @ExceptionHandler(DuplicateKeyException.class)
     public ResponseEntity<Response> handleDuplicateKeyException(DuplicateKeyException e) {
         log.error("数据已存在: {}", e.getMessage());
-        return ResponseEntity.badRequest().body(Response.error(409, "数据已存在"));
+        return ResponseEntity.ok().body(Response.error(409, "数据已存在"));
     }
 
     @ExceptionHandler(FeignException.class)
     public ResponseEntity<Response> handleFeignException(FeignException e) {
         log.error("Feign异常: {}", e.getMessage());
-        return ResponseEntity.badRequest().body(Response.error(e.status(), e.getMessage()));
+        return ResponseEntity.ok().body(Response.error(e.status(), e.getMessage()));
     }
 
 }
