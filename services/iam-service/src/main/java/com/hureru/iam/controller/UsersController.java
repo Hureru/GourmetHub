@@ -77,12 +77,13 @@ public class UsersController {
     }
 
     /**
-     * 内部接口，仅限product_artisan-service 服务调用，获取待审核用户列表
+     * 内部接口，仅限 product_artisan-service 服务调用，获取待审核用户列表
      *
      * @return 待审核用户ID列表
      */
     // TODO GetaWay 保护
     @GetMapping("/internal/users/pending")
+    @PreAuthorize("hasAuthority('SCOPE_users.pending')")
     public List<String> getPendingUsers() {
         return usersService.getPendingUserIds();
     }
@@ -93,6 +94,7 @@ public class UsersController {
      * @return 是否有效
      */
     @GetMapping("/internal/isEffectiveArtisan")
+    @PreAuthorize("hasAuthority('SCOPE_artisan.isEffective')")
     public Boolean isEffectiveArtisan(@RequestParam String id) {
         return usersService.checkArtisanEffective(id);
     }

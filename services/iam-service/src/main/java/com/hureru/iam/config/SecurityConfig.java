@@ -127,7 +127,6 @@ public class SecurityConfig {
                 .authorizeHttpRequests((authorize) -> authorize
                         // 公开访问注册、登录和错误页面
                         .requestMatchers("/api/v1/register/*",
-                                "/api/v1/internal/**",
                                 "/login",
                                 "/error").permitAll()
                         // 其他所有请求都需要认证
