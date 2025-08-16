@@ -1,0 +1,10 @@
+spring:
+  profiles:
+    include: router # 激活 router 配置文件
+  application:
+    name: gateway
+  cloud:
+    nacos:
+      server-addr: 127.0.0.1:8848
+server:
+  port: 80

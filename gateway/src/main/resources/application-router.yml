@@ -1,0 +1,19 @@
+# 使用配置文件进行网关路由配置
+spring:
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowed-origin-patterns: '*'
+            allowed-headers: '*'
+            allowed-methods: '*'
+#      routes:
+
+logging:
+  level:
+    root: INFO
+    org.springframework.cloud.gateway: TRACE
