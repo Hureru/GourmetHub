@@ -12,8 +12,3 @@ spring:
             allowed-headers: '*'
             allowed-methods: '*'
 #      routes:
-
-logging:
-  level:
-    root: INFO
-    org.springframework.cloud.gateway: TRACE
