@@ -176,8 +176,11 @@ public class ProductServiceImpl implements IProductService {
     }
 
     @Override
-    public List<Product> getProductsByName(String name) {
-        return productRepository.findByName(name);
+    public List<String> getProductIdsByArtisanId(Long artisanId) {
+        List<Product> products = productRepository.findByArtisanId(artisanId.toString());
+        List<String> list = products.stream().map(Product::getId).toList();
+        log.debug("[service] getProductIdsByArtisanId... \nProductIds: {}", list);
+        return list;
     }
 
     @Override

@@ -19,7 +19,7 @@ public interface ProductRepository extends MongoRepository<Product, String> {
 
     List<Product> findByIsPublished(boolean b);
 
-    List<Product> findByArtisanId(String idString);
+    List<Product> findByArtisanId(String artisanId);
 
     List<Product> findByIdIn(List<String> ids);
 }

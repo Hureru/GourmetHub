@@ -49,12 +49,28 @@ public class ProductController {
         log.debug("[controller] searchProducts.....");
         return R.ok(paginationData);
     }
-
+    /**
+     * 内部接口 根据产品ID列表批量获取产品信息
+     * @param ids 产品ID列表
+     * @return 包含产品信息列表的统一返回结果
+     */
     @GetMapping("/internal/products/batch")
     public R<List<Product>> getProductsByIds(@RequestParam("ids") List<String> ids) {
         log.debug("[controller] getProductsByIds.....");
         List<Product> products = productService.getProductsByIds(ids);
         return R.ok(products);
+    }
+
+    /**
+     * 内部接口 获取当前用户所有产品的ID列表
+     * @param jwt 用户信息
+     * @return 统一返回结果
+     */
+    @GetMapping("/internal/productIds")
+    public R<List<String>> getProductIdsByArtisanId(@AuthenticationPrincipal Jwt jwt){
+        Long artisanId = JwtUtil.getUserIdFromJwt(jwt);
+        log.info("[controller] getProductIdsByArtisanId...");
+        return R.ok(productService.getProductIdsByArtisanId(artisanId));
     }
 
     /**

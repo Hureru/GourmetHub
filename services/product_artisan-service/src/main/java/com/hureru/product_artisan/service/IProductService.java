@@ -41,7 +41,7 @@ public interface IProductService {
      * @return 分页后的产品数据
      */
     PaginationData<Product> searchProducts(ProductQueryDTO queryDTO, int page, int size, boolean isPublished);
-    List<Product> getProductsByName(String name);
+    List<String> getProductIdsByArtisanId(Long artisanId);
     void deleteProduct(Long userId, String id);
 
     PaginationData<Product> getProductsByArtisanId(Long userId, ArtisanProductQueryDTO queryDTO, int page, int size);
