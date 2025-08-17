@@ -2,7 +2,9 @@ package com.hureru.order.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.hureru.common.PaginationData;
 import com.hureru.common.exception.BusinessException;
 import com.hureru.order.OrderStatus;
 import com.hureru.order.bean.CartItems;
@@ -10,6 +12,7 @@ import com.hureru.order.bean.OrderItems;
 import com.hureru.order.bean.Orders;
 import com.hureru.order.dto.CreateOrderDirectlyDTO;
 import com.hureru.order.dto.CreateOrderFromCartDTO;
+import com.hureru.order.dto.OrderDTO;
 import com.hureru.order.dto.OrderTransactionPayload;
 import com.hureru.order.dto.StockDeductionRequest.OrderItemDTO;
 import com.hureru.order.feign.AddressFeignClient;
@@ -24,6 +27,7 @@ import com.hureru.product_artisan.bean.Product;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
+import org.springframework.beans.BeanUtils;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,6 +62,28 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     private final ICartsService cartsService;
 
     public static final String TX_ORDER_TOPIC = "TX_ORDER_TOPIC";
+
+    @Override
+    public PaginationData<OrderDTO> getUserOrders(Long userId, int page, int size) {
+        Page<Orders> pageObj = new Page<>(page, size);
+
+        pageObj = lambdaQuery()
+                .eq(Orders::getUserId, userId)
+                .orderByDesc(Orders::getCreatedAt)
+                .page(pageObj);
+
+        List<OrderDTO> orderDTOS = pageObj.getRecords().stream()
+                .map(this::getOrderDTO)
+                .toList();
+
+        return new PaginationData<>(
+                orderDTOS,
+                pageObj.getTotal(),
+                (int) pageObj.getPages(),
+                (int) pageObj.getCurrent(),
+                (int) pageObj.getSize()
+        );
+    }
 
     @Override
     public String createOrderFromCart(Long userId, CreateOrderFromCartDTO dto) {
@@ -184,8 +210,19 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     }
 
     @Override
-    public Orders getOrderFromUser(Long userId, String orderSn) {
-        return this.getOne(new LambdaQueryWrapper<Orders>().eq(Orders::getOrderSn, orderSn).eq(Orders::getUserId, userId));
+    public OrderDTO getOrderFromUser(Long userId, String orderSn) {
+        Orders one = getOne(new LambdaQueryWrapper<Orders>().eq(Orders::getOrderSn, orderSn).eq(Orders::getUserId, userId));
+        return getOrderDTO(one);
+    }
+
+    private OrderDTO getOrderDTO(Orders one) {
+        if (one == null) {
+            return null;
+        }
+        OrderDTO orderDTO = new OrderDTO();
+        BeanUtils.copyProperties(one, orderDTO);
+        orderDTO.setOrderItems(orderItemsMapper.selectList(new LambdaQueryWrapper<OrderItems>().eq(OrderItems::getOrderId, one.getId())));
+        return orderDTO;
     }
 
     @Override

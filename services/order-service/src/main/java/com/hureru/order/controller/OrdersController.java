@@ -1,17 +1,17 @@
 package com.hureru.order.controller;
 
 
+import com.hureru.common.PaginationData;
 import com.hureru.common.R;
 import com.hureru.common.utils.JwtUtil;
-import com.hureru.order.bean.Orders;
 import com.hureru.order.dto.CreateOrderDirectlyDTO;
 import com.hureru.order.dto.CreateOrderFromCartDTO;
+import com.hureru.order.dto.OrderDTO;
 import com.hureru.order.service.IOrdersService;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -27,6 +27,23 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/orders")
 public class OrdersController {
     private final IOrdersService ordersService;
+
+    /**
+     * 获取当前用户的所有订单
+     *
+     * @param page 当前页码
+     * @param size 每页大小
+     * @return 订单列表
+     */
+    @GetMapping
+    @PreAuthorize("hasAuthority('SCOPE_order.get')")
+    public PaginationData<OrderDTO> getUserOrders(
+            @AuthenticationPrincipal Jwt jwt,
+            @Min(1) @RequestParam(defaultValue = "1") int page,
+            @Min(5) @RequestParam(defaultValue = "10") int size) {
+        Long userId = JwtUtil.getUserIdFromJwt(jwt);
+        return ordersService.getUserOrders(userId, page, size);
+    }
 
     /**
      * 从购物车创建订单 (已更新为按选中项结算)
@@ -59,11 +76,11 @@ public class OrdersController {
      */
     @GetMapping("/{orderId}")
     @PreAuthorize("hasAuthority('SCOPE_orders.view')")
-    public R<Orders> getOrderByOrderId(
+    public R<OrderDTO> getOrderByOrderId(
             @AuthenticationPrincipal Jwt jwt,
             @PathVariable String orderId) {
         Long userId = JwtUtil.getUserIdFromJwt(jwt);
-        Orders order = ordersService.getOrderFromUser(userId, orderId);
+        OrderDTO order = ordersService.getOrderFromUser(userId, orderId);
         return R.ok(order);
     }
 }
