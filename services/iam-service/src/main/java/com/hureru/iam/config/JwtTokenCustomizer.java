@@ -26,18 +26,18 @@ public class JwtTokenCustomizer implements OAuth2TokenCustomizer<JwtEncodingCont
                     "users.status.update", "users.delete",
                     "artisan.active", "artisans.pendings",
                     "artisans.delete", "products.approve",
-                    "products.get"));
+                    "products.get","orders.list"));
             put("ROLE_MODERATOR",
                     List.of("artisan.active", "artisans.pendings", "products.approve"));
             put("ROLE_ARTISAN",
                     List.of("artisans.get", "artisans.update",
                     "products.add","products.artisan.get",
-                    "products.update", "products.delete"));
+                    "products.update", "products.delete", "orders.artisan"));
             put("ROLE_USER",
                     List.of("address", "userprofile",
                     "artisans.get", "products.view",
-                    "cart-items.update","cart-items.create","cart-items.delete",
-                    "orders.create", "orders.view",
+                    "cart-items.update","cart-items.create","cart-items.delete","cart.get",
+                    "orders.create", "orders.view","order.get",
                     "users.pending","artisan.isEffective"));
         }
     };
