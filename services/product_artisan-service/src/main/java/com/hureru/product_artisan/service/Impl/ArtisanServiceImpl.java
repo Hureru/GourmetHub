@@ -85,7 +85,7 @@ public class ArtisanServiceImpl implements IArtisanService {
         Pageable pageable = PageRequest.of(page - 1, size, Sort.by("createdAt").descending());
 
         // 查询总记录数 (不含分页)
-        long total = artisanRepository.count();
+        long total = userIds.size();
 
         // 执行分页查询
         Page<Artisan> productPage = artisanRepository.findByIdIn(userIds, pageable);
