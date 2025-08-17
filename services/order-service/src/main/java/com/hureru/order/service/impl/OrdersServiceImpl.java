@@ -73,7 +73,7 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                 .page(pageObj);
 
         List<OrderDTO> orderDTOS = pageObj.getRecords().stream()
-                .map(this::getOrderDTO)
+                .map(one -> getOrderDTO(one, false))
                 .toList();
 
         return new PaginationData<>(
@@ -212,16 +212,23 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     @Override
     public OrderDTO getOrderFromUser(Long userId, String orderSn) {
         Orders one = getOne(new LambdaQueryWrapper<Orders>().eq(Orders::getOrderSn, orderSn).eq(Orders::getUserId, userId));
-        return getOrderDTO(one);
+        return getOrderDTO(one, true);
     }
 
-    private OrderDTO getOrderDTO(Orders one) {
+    private OrderDTO getOrderDTO(Orders one, boolean isAll) {
         if (one == null) {
             return null;
         }
         OrderDTO orderDTO = new OrderDTO();
         BeanUtils.copyProperties(one, orderDTO);
-        orderDTO.setOrderItems(orderItemsMapper.selectList(new LambdaQueryWrapper<OrderItems>().eq(OrderItems::getOrderId, one.getId())));
+
+        LambdaQueryWrapper<OrderItems> queryWrapper = new LambdaQueryWrapper<OrderItems>().eq(OrderItems::getOrderId, one.getId());
+        if (!isAll) {
+            // 如果 isAll 为 false，只查询前3个订单项
+            queryWrapper.last("LIMIT 3");
+        }
+        orderDTO.setOrderItems(orderItemsMapper.selectList(queryWrapper));
+
         return orderDTO;
     }
 
