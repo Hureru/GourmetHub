@@ -4,6 +4,7 @@ package com.hureru.order.controller;
 import com.hureru.common.PaginationData;
 import com.hureru.common.R;
 import com.hureru.common.utils.JwtUtil;
+import com.hureru.order.OrderStatus;
 import com.hureru.order.dto.CreateOrderDirectlyDTO;
 import com.hureru.order.dto.CreateOrderFromCartDTO;
 import com.hureru.order.dto.OrderDTO;
@@ -73,6 +74,9 @@ public class OrdersController {
 
     /**
      * 根据业务订单ID查询订单 需要用户权限
+     *
+     * @param orderSn 业务订单ID
+     * @return 订单信息
      */
     @GetMapping("/{orderSn}")
     @PreAuthorize("hasAuthority('SCOPE_orders.view')")
@@ -82,5 +86,17 @@ public class OrdersController {
         Long userId = JwtUtil.getUserIdFromJwt(jwt);
         OrderDTO order = ordersService.getOrderFromUser(userId, orderSn);
         return R.ok(order);
+    }
+
+    /**
+     * 根据条件查询所有订单，需要 管理员 权限
+     */
+    @GetMapping
+    @PreAuthorize("hasAuthority('SCOPE_orders.list')")
+    public R<PaginationData<OrderDTO>> getAllOrders(
+            @RequestParam(required = false) OrderStatus status,
+            @Min(1) @RequestParam(defaultValue = "1") int page,
+            @Min(5) @RequestParam(defaultValue = "10") int size){
+        return R.ok(ordersService.getAllOrders(status, page, size));
     }
 }

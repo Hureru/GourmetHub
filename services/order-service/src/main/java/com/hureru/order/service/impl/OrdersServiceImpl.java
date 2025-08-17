@@ -2,6 +2,7 @@ package com.hureru.order.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hureru.common.PaginationData;
@@ -62,6 +63,29 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     private final ICartsService cartsService;
 
     public static final String TX_ORDER_TOPIC = "TX_ORDER_TOPIC";
+
+    @Override
+    public PaginationData<OrderDTO> getAllOrders(OrderStatus status, int page, int size) {
+        Page<Orders> pageObj = new Page<>(page, size);
+
+        QueryWrapper<Orders> queryWrapper = new QueryWrapper<Orders>().orderByDesc("created_at");
+        if (status != null) {
+            queryWrapper.eq("status", status);
+        }
+        pageObj = baseMapper.selectPage(pageObj, queryWrapper);
+
+        List<OrderDTO> orderDTOS = pageObj.getRecords().stream()
+                .map(one -> getOrderDTO(one, false))
+                .toList();
+
+        return new PaginationData<>(
+                orderDTOS,
+                pageObj.getTotal(),
+                (int) pageObj.getPages(),
+                (int) pageObj.getCurrent(),
+                (int) pageObj.getSize()
+        );
+    }
 
     @Override
     public PaginationData<OrderDTO> getUserOrders(Long userId, int page, int size) {

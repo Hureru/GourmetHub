@@ -1,6 +1,7 @@
 package com.hureru.order.service;
 
 import com.hureru.common.PaginationData;
+import com.hureru.order.OrderStatus;
 import com.hureru.order.bean.Orders;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.hureru.order.dto.CreateOrderDirectlyDTO;
@@ -17,6 +18,8 @@ import com.hureru.order.dto.OrderTransactionPayload;
  * @since 2025-07-26
  */
 public interface IOrdersService extends IService<Orders> {
+    PaginationData<OrderDTO> getAllOrders(OrderStatus status, int page, int size);
+
     PaginationData<OrderDTO> getUserOrders(Long userId, int page, int size);
 
     String createOrderFromCart(Long userId, CreateOrderFromCartDTO dto);
