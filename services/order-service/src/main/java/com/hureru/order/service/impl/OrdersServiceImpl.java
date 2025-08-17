@@ -22,6 +22,7 @@ import com.hureru.order.mapper.CartItemsMapper;
 import com.hureru.order.mapper.OrderItemsMapper;
 import com.hureru.order.mapper.OrdersMapper;
 import com.hureru.order.service.ICartsService;
+import com.hureru.order.service.IOrderItemsService;
 import com.hureru.order.service.IOrdersService;
 import com.hureru.order.utils.OrderIdUtil;
 import com.hureru.product_artisan.bean.Product;
@@ -37,9 +38,7 @@ import org.springframework.util.CollectionUtils;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -60,6 +59,7 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     private final OrderIdUtil orderIdUtil;
     private final RocketMQTemplate rocketMQTemplate;
     private final OrderItemsMapper orderItemsMapper;
+    private final IOrderItemsService orderItemsService;
     private final ICartsService cartsService;
 
     public static final String TX_ORDER_TOPIC = "TX_ORDER_TOPIC";
@@ -68,11 +68,10 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     public PaginationData<OrderDTO> getAllOrders(OrderStatus status, int page, int size) {
         Page<Orders> pageObj = new Page<>(page, size);
 
-        QueryWrapper<Orders> queryWrapper = new QueryWrapper<Orders>().orderByDesc("created_at");
-        if (status != null) {
-            queryWrapper.eq("status", status);
-        }
-        pageObj = baseMapper.selectPage(pageObj, queryWrapper);
+        pageObj = this.lambdaQuery()
+                .orderByDesc(Orders::getCreatedAt)
+                .eq(status != null, Orders::getStatus, status)
+                .page(pageObj);
 
         List<OrderDTO> orderDTOS = pageObj.getRecords().stream()
                 .map(one -> getOrderDTO(one, false))
@@ -82,8 +81,71 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                 orderDTOS,
                 pageObj.getTotal(),
                 (int) pageObj.getPages(),
-                (int) pageObj.getCurrent(),
+                (int) pageObj.getCurrent() - 1,
                 (int) pageObj.getSize()
+        );
+    }
+
+
+    @Override
+    public PaginationData<OrderDTO> getOrdersWithArtisanItemsByStatus(OrderStatus status, int page, int size) {
+        // 1. 从MongoDB中找出该商家的所有商品ID
+        List<String> artisanProductIds = productFeignClient.getProductIdsByArtisanId().getData();
+        log.debug("[service] getOrdersWithArtisanItemsByStatus... artisanProductIds: {}", artisanProductIds);
+        if (artisanProductIds.isEmpty()) {
+            return new PaginationData<>(new ArrayList<>(), 0, 0, page, size);
+        }
+
+        // 2. 找出包含这些商品的订单项
+        List<OrderItems> orderItemsWithArtisanProducts = orderItemsService.lambdaQuery()
+                .in(OrderItems::getProductId, artisanProductIds)
+                .list();
+
+        if (orderItemsWithArtisanProducts.isEmpty()) {
+            return new PaginationData<>(new ArrayList<>(), 0, 0, page, size);
+        }
+
+        // 3. 获取相关的订单ID
+        Set<Long> orderIds = orderItemsWithArtisanProducts.stream()
+                .map(OrderItems::getOrderId)
+                .collect(Collectors.toSet());
+        log.debug("相关的订单ID: {}", orderIds);
+
+        // 4. 查询订单信息
+        Page<Orders> pageObj = Page.of(page, size);
+        Page<Orders> resultPage = this.lambdaQuery()
+                .in(Orders::getId, orderIds)
+                .eq(status != null, Orders::getStatus, status)
+                .orderByDesc(Orders::getCreatedAt)
+                .page(pageObj);
+
+
+        // 5. 构建订单ID到订单项列表的映射
+        Map<Long, List<OrderItems>> orderIdToItemsMap = orderItemsWithArtisanProducts.stream()
+                .collect(Collectors.groupingBy(OrderItems::getOrderId));
+
+        // 6. 转换为OrderDTO列表
+        List<OrderDTO> orderDTOs = resultPage.getRecords().stream()
+                .map(order -> {
+                    OrderDTO orderDTO = new OrderDTO();
+                    // 复制订单基本信息
+                    BeanUtils.copyProperties(order, orderDTO);
+
+                    // 设置只包含该商家商品的订单项
+                    List<OrderItems> itemsForThisArtisan = orderIdToItemsMap.get(order.getId());
+                    orderDTO.setOrderItems(itemsForThisArtisan != null ? itemsForThisArtisan : new ArrayList<>());
+
+                    return orderDTO;
+                })
+                .collect(Collectors.toList());
+
+        // 7. 返回分页数据
+        return new PaginationData<>(
+                orderDTOs,
+                resultPage.getTotal(),
+                (int) resultPage.getPages(),
+                (int) resultPage.getCurrent() - 1,
+                (int) resultPage.getSize()
         );
     }
 

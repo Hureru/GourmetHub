@@ -20,6 +20,14 @@ import com.hureru.order.dto.OrderTransactionPayload;
 public interface IOrdersService extends IService<Orders> {
     PaginationData<OrderDTO> getAllOrders(OrderStatus status, int page, int size);
 
+    /**
+     * 根据商家ID获取包含该商家商品的所有订单，返回OrderDTO格式
+     * @param page 页码
+     * @param size 每页大小
+     * @return 分页订单数据(OrderDTO格式)
+     */
+    PaginationData<OrderDTO> getOrdersWithArtisanItemsByStatus(OrderStatus status, int page, int size);
+
     PaginationData<OrderDTO> getUserOrders(Long userId, int page, int size);
 
     String createOrderFromCart(Long userId, CreateOrderFromCartDTO dto);

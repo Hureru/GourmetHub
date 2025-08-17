@@ -20,4 +20,7 @@ public interface ProductFeignClient {
 
     @GetMapping("/internal/products/batch")
     R<List<Product>> getProductsByIds(@RequestParam("ids") List<String> ids);
+
+    @GetMapping("/internal/productIds")
+    R<List<String>> getProductIdsByArtisanId();
 }

@@ -91,12 +91,24 @@ public class OrdersController {
     /**
      * 根据条件查询所有订单，需要 管理员 权限
      */
-    @GetMapping
+    @GetMapping("/withAdmin")
     @PreAuthorize("hasAuthority('SCOPE_orders.list')")
     public R<PaginationData<OrderDTO>> getAllOrders(
             @RequestParam(required = false) OrderStatus status,
             @Min(1) @RequestParam(defaultValue = "1") int page,
             @Min(5) @RequestParam(defaultValue = "10") int size){
         return R.ok(ordersService.getAllOrders(status, page, size));
+    }
+
+    /**
+     * 根据订单状态获取订单 需要 商家 权限
+     */
+    @GetMapping("/withArtisan")
+    @PreAuthorize("hasAuthority('SCOPE_orders.artisan')")
+    public R<PaginationData<OrderDTO>> getOrdersWithArtisanItemsByStatus(
+            @RequestParam(required = false) OrderStatus status,
+            @Min(1) @RequestParam(defaultValue = "1") int page,
+            @Min(5) @RequestParam(defaultValue = "10") int size){
+        return R.ok(ordersService.getOrdersWithArtisanItemsByStatus(status, page, size));
     }
 }
