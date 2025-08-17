@@ -184,6 +184,11 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     }
 
     @Override
+    public Orders getOrderFromUser(Long userId, String orderSn) {
+        return this.getOne(new LambdaQueryWrapper<Orders>().eq(Orders::getOrderSn, orderSn).eq(Orders::getUserId, userId));
+    }
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean executeCreateOrderTransaction(OrderTransactionPayload payload) {
         try {

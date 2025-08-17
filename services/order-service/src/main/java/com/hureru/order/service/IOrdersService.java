@@ -19,7 +19,8 @@ public interface IOrdersService extends IService<Orders> {
 
     String createOrderDirectly(Long userId, CreateOrderDirectlyDTO dto);
 
-    Orders getOrderByOrderId(String orderId);
+    Orders getOrderByOrderId(String orderSn);
+    Orders getOrderFromUser(Long userId, String orderId);
 
     // 本地事务方法
     boolean executeCreateOrderTransaction(OrderTransactionPayload payload);

@@ -55,12 +55,15 @@ public class OrdersController {
     }
 
     /**
-     * 根据业务订单ID查询订单
+     * 根据业务订单ID查询订单 需要用户权限
      */
     @GetMapping("/{orderId}")
     @PreAuthorize("hasAuthority('SCOPE_orders.view')")
-    public R<Orders> getOrderByOrderId(@PathVariable String orderId) {
-        Orders order = ordersService.getOrderByOrderId(orderId);
+    public R<Orders> getOrderByOrderId(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable String orderId) {
+        Long userId = JwtUtil.getUserIdFromJwt(jwt);
+        Orders order = ordersService.getOrderFromUser(userId, orderId);
         return R.ok(order);
     }
 }
