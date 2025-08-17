@@ -1,5 +1,7 @@
 package com.hureru.order.service.impl;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.hureru.common.PaginationData;
 import com.hureru.common.exception.BusinessException;
 import com.hureru.order.bean.CartItems;
 import com.hureru.order.mapper.CartItemsMapper;
@@ -7,6 +9,7 @@ import com.hureru.order.service.ICartItemsService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hureru.order.service.ICartsService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,10 +27,37 @@ import java.util.stream.Collectors;
  * @author zheng
  * @since 2025-07-26
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CartItemsServiceImpl extends ServiceImpl<CartItemsMapper, CartItems> implements ICartItemsService {
     private final ICartsService cartsService;
+
+    @Override
+    public PaginationData<CartItems> getUserCart(Long userId, int page, int size) {
+        // 获取用户购物车ID
+        Long cartId = cartsService.getUserCart(userId);
+
+        // 创建分页对象
+        Page<CartItems> pageObj = Page.of(page, size);
+
+        // 构造查询条件
+        pageObj = this.lambdaQuery()
+                .eq(CartItems::getCartId, cartId)
+                .orderByDesc(CartItems::getAddedAt)
+                .page(pageObj);
+
+        log.debug("分页查询结果：total:{}; pages: {}, current: {}", pageObj.getTotal(), pageObj.getPages(), pageObj.getCurrent());
+
+        // 转换为 PaginationData 对象返回
+        return new PaginationData<>(
+                pageObj.getRecords(),
+                pageObj.getTotal(),
+                (int) pageObj.getPages(),
+                (int) pageObj.getCurrent() - 1,
+                (int) pageObj.getSize()
+        );
+    }
 
     @Override
     @Transactional

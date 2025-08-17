@@ -1,5 +1,6 @@
 package com.hureru.order.service;
 
+import com.hureru.common.PaginationData;
 import com.hureru.order.bean.CartItems;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -14,6 +15,13 @@ import java.util.Collection;
  * @since 2025-07-26
  */
 public interface ICartItemsService extends IService<CartItems> {
+    /**
+     * 获取用户购物车
+     * @param userId 用户 id
+     * @return 购物车 列表
+     */
+    PaginationData<CartItems> getUserCart(Long userId, int page, int size);
+
     /**
      * 更新购物车项
      * @param userId 用户 id
