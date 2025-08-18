@@ -10,6 +10,9 @@ import com.hureru.product_artisan.service.IArtisanService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,6 +50,7 @@ public class ArtisanServiceImpl implements IArtisanService {
     }
 
     @Override
+    @Cacheable(value = "artisans", key = "#id", unless = "#result == null")
     public Artisan getArtisanById(String id, Long operateId) {
         // 判断 是不是商家本人 或者 是否是审核通过的商家
         if (id.equals(operateId.toString()) || userFeignClient.isEffectiveArtisan(id)){
@@ -106,6 +110,7 @@ public class ArtisanServiceImpl implements IArtisanService {
     }
 
     @Override
+    @CachePut(value = "artisans", key = "#id")
     public void updateArtisan(Long operateId, String id, ArtisanDTO dto) {
         if (!operateId.equals(Long.parseLong(id))){
             throw new BusinessException(403, "无权限操作此数据");
@@ -116,6 +121,7 @@ public class ArtisanServiceImpl implements IArtisanService {
     // 使用MQ 异步删除用户
     @Override
     @Transactional
+    @CacheEvict(value = "artisans", key = "#id")
     public void deleteArtisan(String id) {
         // 1. 检查商家是否存在，防止发送无效消息
         if (!artisanRepository.existsById(id)) {

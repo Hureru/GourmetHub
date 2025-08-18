@@ -9,6 +9,8 @@ import com.hureru.iam.mapper.AddressesMapper;
 import com.hureru.iam.service.IAddressesService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.BeanUtils;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +33,7 @@ import static com.baomidou.mybatisplus.core.toolkit.StringUtils.camelToUnderline
 public class AddressesServiceImpl extends ServiceImpl<AddressesMapper, Addresses> implements IAddressesService {
 
     @Override
+    @Cacheable(value = "userAddresses", key = "#userId")
     public List<Addresses> getAllAddressesByUserId(Long userId){
         QueryWrapper<Addresses> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("user_id", userId);
@@ -39,6 +42,7 @@ public class AddressesServiceImpl extends ServiceImpl<AddressesMapper, Addresses
 
     @Override
     @Transactional
+    @CacheEvict(value = "userAddresses", key = "#userId")
     public Addresses insertAddress(Long userId, AddressDTO addressDTO){
         // 判断用户地址数量是否超过上限
         QueryWrapper<Addresses> countWrapper = new QueryWrapper<>();
@@ -69,6 +73,7 @@ public class AddressesServiceImpl extends ServiceImpl<AddressesMapper, Addresses
                     .toList();
     @Override
     @Transactional
+    @CacheEvict(value = "userAddresses", key = "#userId")
     public void updateAddress(Long addrId, Long userId, AddressDTO addresses){
         // 验证地址所属用户
         checkUserAddr(addrId, userId);
@@ -93,6 +98,7 @@ public class AddressesServiceImpl extends ServiceImpl<AddressesMapper, Addresses
 
     @Override
     @Transactional
+    @CacheEvict(value = "userAddresses", key = "#userId")
     public void updateDefaultAddr(Long addrId, Long userId) {
         // 验证地址所属用户
         checkUserAddr(addrId, userId);
@@ -113,6 +119,7 @@ public class AddressesServiceImpl extends ServiceImpl<AddressesMapper, Addresses
 
     @Override
     @Transactional
+    @CacheEvict(value = "userAddresses", key = "#userId")
     public void deleteAddress(Long addrId, Long userId) {
         // 验证地址所属用户
         checkUserAddr(addrId, userId);

@@ -14,3 +14,4 @@ spring:
       - nacos:resource_oauth.yaml?group=COMMON
       - nacos:nacos.yaml?group=COMMON
       - nacos:rocketmq.yaml?group=COMMON
+      - nacos:redis.yaml?group=COMMON

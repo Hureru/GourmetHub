@@ -5,6 +5,7 @@ import com.hureru.order.bean.Carts;
 import com.hureru.order.mapper.CartsMapper;
 import com.hureru.order.service.ICartsService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 /**
@@ -19,7 +20,8 @@ import org.springframework.stereotype.Service;
 public class CartsServiceImpl extends ServiceImpl<CartsMapper, Carts> implements ICartsService {
 
     @Override
-    //TODO 使用 Redis 缓存
+    // 使用 Redis 缓存
+    @Cacheable(value = "userCarts", key = "#userId")
     public Long getUserCart(Long userId) {
         Carts cart = getOne(new QueryWrapper<Carts>().eq("user_id", userId));
         if (cart != null) {

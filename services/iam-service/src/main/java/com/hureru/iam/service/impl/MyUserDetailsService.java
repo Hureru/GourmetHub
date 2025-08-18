@@ -10,6 +10,7 @@ import com.hureru.iam.mapper.UsersMapper;
 import com.hureru.iam.oauth.SecurityUser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -39,6 +40,7 @@ public class MyUserDetailsService implements UserDetailsService {
      * @throws UsernameNotFoundException 如果用户不存在
      */
     @Override
+    @Cacheable(value = "user-details", key = "#email")
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         // 1. 根据用户名查询用户
         // 注意：这里假设你的 UserDetailsService 继承或注入了 IUsersService 的能力

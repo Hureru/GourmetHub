@@ -27,6 +27,17 @@
     </properties>
 
     <dependencies>
+        <!-- Spring Boot Starter for Caching -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-cache</artifactId>
+        </dependency>
+
+        <!-- Spring Boot Starter for Redis -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
 
         <!-- Spring Boot Security Starter -->
         <dependency>

@@ -16,6 +16,9 @@ import com.mongodb.client.result.UpdateResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.*;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -46,6 +49,7 @@ public class ProductServiceImpl implements IProductService {
     public static final String TOPIC = "COMPENSATE_STOCK_TOPIC";
 
     @Override
+    @CachePut(value = "products", key = "#result.id")
     public Product saveProduct(Long userId, ProductDTO productDTO) {
         Product product = new Product();
         product.setSku(productDTO.getSku());
@@ -86,6 +90,7 @@ public class ProductServiceImpl implements IProductService {
     }
 
     @Override
+    @CachePut(value = "products", key = "#id")
     public Product updateProduct(Long userId, String id, ProductDTO productDTO) {
         Product product = productRepository.findById(id).orElseThrow(()-> new BusinessException(404, "产品不存在"));
         if (!product.getArtisanId().equals(userId.toString())){
@@ -129,6 +134,7 @@ public class ProductServiceImpl implements IProductService {
     }
 
     @Override
+    @Cacheable(value = "products", key = "#id", unless = "#result == null")
     public Product getProductById(String id) {
         log.debug("[service] (getProductById) id: {}", id);
          Product product = productRepository.findById(id).orElseThrow(() -> new BusinessException(404, "产品不存在"));
@@ -184,6 +190,7 @@ public class ProductServiceImpl implements IProductService {
     }
 
     @Override
+    @CacheEvict(value = "products", key = "#id")
     public void deleteProduct(Long userId, String id) {
         Product product = productRepository.findById(id).orElseThrow(() -> new BusinessException(404, "产品不存在"));
         if (!product.getArtisanId().equals(userId.toString())) {

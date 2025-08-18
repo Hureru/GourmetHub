@@ -16,6 +16,7 @@ import com.hureru.product_artisan.dto.ArtisanDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -47,6 +48,7 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
 
     @Override
     @Transactional
+    @CacheEvict(value = "user-details", key = "#email")
     public Users userRegister(String email, String password, String nickname) {
         Users user = register(email, password, true);
         user.setStatus(Users.Status.ACTIVE);
@@ -61,6 +63,7 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
 
     @Override
     @Transactional
+    @CacheEvict(value = "user-details", key = "#artisanDTO.email")
     // MQ 保证数据一致性
     public Users artisanRegister(ArtisanDTO artisanDTO) {
         // 1. 执行本地数据库操作，创建用户和角色
