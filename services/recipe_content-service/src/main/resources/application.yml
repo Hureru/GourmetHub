@@ -1,10 +1,19 @@
 spring:
-  application:
-    name: recipe_content-service
-  data:
-    mongodb:
-      #      uri: mongodb://localhost:27017/product_artisan_db
-      # 如果需要用户名密码，使用以下格式：
-      uri: mongodb://root:123456@localhost:27017/db_recipe_content
-server:
-  port: 40000
+  profiles:
+    active: ${ENV:dev}
+  cloud:
+    nacos:
+      config:
+        server-addr: 127.0.0.1:8848
+        namespace: "${spring.profiles.active}"
+        group: RECIPE_CONTENT_SERVICE
+  config:
+    import:
+      - nacos:recipe_content.yaml
+      - nacos:database.yaml
+      - nacos:resource_oauth.yaml?group=COMMON
+      - nacos:nacos.yaml?group=COMMON
+#      - nacos:rocketmq.yaml?group=COMMON
+
+
+
