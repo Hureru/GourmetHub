@@ -9,6 +9,7 @@ import com.hureru.iam.dto.group.Update;
 import com.hureru.product_artisan.bean.Artisan;
 import com.hureru.product_artisan.dto.ArtisanDTO;
 import com.hureru.product_artisan.service.IArtisanService;
+import com.hureru.recipe_content.bean.Recipe;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,7 +36,7 @@ public class ArtisanController {
      * @param artisanDTO 商家信息
      * @return 商家信息
      */
-    //TODO 权限配置: 使用 Getaway 网关配置允许访问服务
+    //权限配置: 使用 Getaway 网关配置允许访问服务
     @PostMapping("/internal/artisan")
     public Artisan addArtisan(@RequestBody @Validated(ChildCreate.class) ArtisanDTO artisanDTO) {
         log.debug("OpenFeign调用[addArtisan]:{}", artisanDTO);
@@ -98,6 +99,18 @@ public class ArtisanController {
     public Response deleteArtisan(@PathVariable String id) {
         artisanService.deleteArtisan(id);
         return Response.ok();
+    }
+
+    /**
+     * 内部接口，获取 ArtisanInfo
+     */
+    @GetMapping("/internal/artisan/info")
+    public R<Recipe.AuthorInfo> getAuthorInfo(Long userId){
+        Artisan artisan = artisanService.getArtisanById(userId.toString(), userId);
+        Recipe.AuthorInfo authorInfo = new Recipe.AuthorInfo();
+        authorInfo.setNickname(artisan.getName());
+        authorInfo.setAvatarUrl(artisan.getLogoUrl());
+        return R.ok("获取成功", authorInfo);
     }
 
 }
