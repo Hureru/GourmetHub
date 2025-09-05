@@ -22,9 +22,9 @@ public class Recipe {
     private String authorId;
     private AuthorInfo authorInfo;
 
-    private int prepTimeMinutes;
-    private int cookTimeMinutes;
-    private int servings;
+    private Integer prepTimeMinutes;
+    private Integer cookTimeMinutes;
+    private Integer servings;
     private String difficulty;
 
     private List<Ingredient> ingredients;
@@ -32,14 +32,14 @@ public class Recipe {
     private List<String> tags;
 
     private Double ratingAverage;
-    private int ratingCount;
+    private Integer ratingCount;
     // 新增评论数字段
-    private int commentCount;
+    private Integer commentCount;
 
-    private boolean isPublished;
-    private Date publishedAt;
-    private Date createdAt;
-    private Date updatedAt;
+    private Boolean isPublished;
+    private String publishedAt;
+    private String createdAt;
+    private String updatedAt;
 
     @Data
     public static class AuthorInfo {
@@ -50,7 +50,7 @@ public class Recipe {
     @Data
     public static class Ingredient {
         private String name;
-        private double amount; // 更改为数值类型
+        private Double amount; // 更改为数值类型
         private String unit;   // 新增单位字段
         private String notes;
         private String productId; // 可选，关联到平台上的具体产品
@@ -58,7 +58,7 @@ public class Recipe {
 
     @Data
     public static class Step {
-        private int stepNumber;
+        private Integer stepNumber;
         private String instruction;
         private String imageUrl; // 新增图片URL字段
     }
