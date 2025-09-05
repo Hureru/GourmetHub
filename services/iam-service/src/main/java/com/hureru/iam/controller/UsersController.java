@@ -81,7 +81,7 @@ public class UsersController {
      *
      * @return 待审核用户ID列表
      */
-    // TODO GetaWay 保护
+    // GetaWay 保护
     @GetMapping("/internal/users/pending")
     @PreAuthorize("hasAuthority('SCOPE_users.pending')")
     public List<String> getPendingUsers() {

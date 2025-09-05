@@ -7,6 +7,7 @@ import com.hureru.common.utils.JwtUtil;
 import com.hureru.iam.bean.UserProfiles;
 import com.hureru.iam.dto.UserProfileDTO;
 import com.hureru.iam.service.IUserProfilesService;
+import com.hureru.recipe_content.bean.Recipe;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -56,6 +57,18 @@ public class UserProfilesController {
         // 更新个人资料
         userProfilesService.updateUserByFields(userId, userProfile);
         return Response.ok(200);
+    }
+
+    /**
+     * 内部接口，获取用户的 nickname 和 avatar_url
+     */
+    @GetMapping("/internal/users/info")
+    public R<Recipe.AuthorInfo> getUserInfo(Long userId) {
+        UserProfiles user = userProfilesService.getById(userId);
+        Recipe.AuthorInfo authorInfo = new Recipe.AuthorInfo();
+        authorInfo.setNickname(user.getNickname());
+        authorInfo.setAvatarUrl(user.getAvatarUrl());
+        return R.ok("获取成功", authorInfo);
     }
 
 }
