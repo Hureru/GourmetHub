@@ -21,4 +21,13 @@ public class JwtUtil {
         }
         return userId;
     }
+
+    public static boolean getIsArtisanFromJwt(Jwt jwt){
+        Object isArtisanObject = jwt.getClaim("isArtisan");
+        boolean isArtisanVisible = false;
+        if (isArtisanObject instanceof Boolean) {
+            isArtisanVisible = (Boolean) isArtisanObject;
+        }
+        return isArtisanVisible;
+    }
 }

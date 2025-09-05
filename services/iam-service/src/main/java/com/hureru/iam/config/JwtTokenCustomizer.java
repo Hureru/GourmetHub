@@ -32,13 +32,18 @@ public class JwtTokenCustomizer implements OAuth2TokenCustomizer<JwtEncodingCont
             put("ROLE_ARTISAN",
                     List.of("artisans.get", "artisans.update",
                     "products.add","products.artisan.get",
-                    "products.update", "products.delete", "orders.artisan"));
+                    "products.update", "products.delete", "orders.artisan",
+                            "recipe.create","recipe.update",
+                            "comment.create"));
             put("ROLE_USER",
                     List.of("address", "userprofile",
                     "artisans.get", "products.view",
-                    "cart-items.update","cart-items.create","cart-items.delete","cart.get",
-                    "orders.create", "orders.view","order.get",
-                    "users.pending","artisan.isEffective"));
+                            "cart-items.update","cart-items.create","cart-items.delete","cart.get",
+                            "orders.create", "orders.view","order.get",
+                            "users.pending",
+                            "artisan.isEffective",
+                            "recipe.create","recipe.update",
+                            "comment.create"));
         }
     };
 
@@ -65,6 +70,7 @@ public class JwtTokenCustomizer implements OAuth2TokenCustomizer<JwtEncodingCont
                         List<String> scopes = roleToScopes.get(roleName);
                         if (scopes != null) {
                             context.getClaims().claim("scope", scopes);
+                            context.getClaims().claim("isArtisan", "ROLE_ARTISAN".equals(roleName));
                         }
                     });
         }
